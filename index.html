@@ -3,204 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Portal</title>
+    <title>My Personal Site</title>
     <style>
-        /* 基本スタイル */
+        /* --- デザイン定義 --- */
+        :root {
+            --bg-color: #EDEDED;
+            --main-text: #000000;
+            --accent: #008CC8;
+            --white: #FFFFFF;
+        }
+
         body {
-            background-color: #EDEDED;
-            color: #000000;
+            background-color: var(--bg-color);
+            color: var(--main-text);
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
-            line-height: 1.6;
+            line-height: 1.7;
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
         }
 
-        .container {
-            width: 90%;
-            max-width: 800px;
-            margin: 40px 0;
-            padding: 20px;
+        /* パスワード保護画面 */
+        #password-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
         }
 
-        /* 認証画面 */
-        #login-screen {
+        .login-box {
+            background: var(--white);
+            padding: 30px;
+            border: 2px solid var(--main-text);
             text-align: center;
-            margin-top: 10vh;
+            box-shadow: 5px 5px 0px var(--main-text);
         }
 
-        input[type="password"] {
+        .login-box input {
             padding: 10px;
-            border: 1px solid #000000;
-            background: #FFF;
-            margin-bottom: 10px;
-            width: 200px;
+            border: 1px solid var(--main-text);
+            width: 80%;
+            margin-bottom: 15px;
+            outline: none;
         }
 
-        button {
-            padding: 10px 20px;
-            background-color: #000000;
-            color: #EDEDED;
+        .login-box button {
+            background: var(--main-text);
+            color: var(--white);
             border: none;
+            padding: 10px 25px;
             cursor: pointer;
-            transition: opacity 0.3s;
+            transition: 0.2s;
         }
 
-        button:hover {
-            opacity: 0.8;
+        .login-box button:hover {
+            background: var(--accent);
         }
 
-        /* コンテンツ（初期は非表示） */
+        /* メインコンテンツ */
         #main-content {
-            display: none;
+            display: none; /* 初期状態は非表示 */
+            max-width: 700px;
+            width: 90%;
+            padding: 60px 0;
         }
 
-        /* 見出し */
-        h1 { border-bottom: 2px solid #000000; padding-bottom: 10px; }
-        h2 { color: #008CC8; border-left: 4px solid #008CC8; padding-left: 10px; margin-top: 30px; }
+        h1 { font-size: 2rem; letter-spacing: 2px; }
+        h2 { 
+            border-left: 5px solid var(--accent); 
+            padding-left: 15px; 
+            margin-top: 50px;
+            font-size: 1.5rem;
+        }
+
+        /* 目次 (TOC) */
+        .toc-container {
+            background: var(--white);
+            border: 1px solid var(--main-text);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc-container ul { list-style: none; padding: 0; }
+        .toc-container li { margin: 5px 0; }
+        .toc-container a { 
+            text-decoration: none; 
+            color: var(--main-text);
+        }
+        .toc-container a:hover { color: var(--accent); }
 
         /* リンク */
-        a { color: #008CC8; text-decoration: none; }
+        a { color: var(--accent); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        /* 目次 */
-        .toc {
-            background: #FFF;
-            padding: 20px;
-            border: 1px solid #000000;
-            margin-bottom: 30px;
-        }
-        .toc ul { list-style: none; padding-left: 0; }
-        .toc li { margin-bottom: 5px; }
-
-        /* 折り畳み (Details) */
-        details {
-            background: #FFF;
-            border: 1px solid #000000;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        summary { cursor: pointer; font-weight: bold; }
-
-        /* タブ */
-        .tabs { display: flex; border-bottom: 2px solid #000000; margin-top: 20px; }
-        .tab-button {
+        /* タブシステム */
+        .tabs { margin-top: 20px; }
+        .tab-buttons { display: flex; gap: 2px; }
+        .tab-btn {
+            background: #ddd;
+            border: 1px solid var(--main-text);
             padding: 10px 20px;
-            border: none;
-            background: none;
+            cursor: pointer;
+            border-bottom: none;
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .tab-panel {
+            display: none;
+            background: var(--white);
+            border: 1px solid var(--main-text);
+            padding: 20px;
+        }
+        .tab-panel.active { display: block; }
+
+        /* 折り畳み */
+        details {
+            margin: 15px 0;
+            background: var(--white);
+            border: 1px solid var(--main-text);
+        }
+        summary {
+            padding: 15px;
             cursor: pointer;
             font-weight: bold;
+            list-style: none;
         }
-        .tab-button.active {
-            background-color: #008CC8;
-            color: #FFF;
-        }
-        .tab-content {
-            display: none;
-            background: #FFF;
-            padding: 20px;
-            border: 1px solid #000000;
-            border-top: none;
-        }
-        .tab-content.active { display: block; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "+ "; color: var(--accent); }
+        details[open] summary::before { content: "- "; }
+        .details-content { padding: 0 15px 15px 15px; border-top: 1px solid var(--bg-color); }
 
-        /* ユーティリティ */
-        .accent-text { color: #008CC8; font-weight: bold; }
+        footer {
+            margin-top: 80px;
+            text-align: center;
+            font-size: 0.8rem;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="login-screen">
-        <h1>Private Page</h1>
-        <p>コンテンツを表示するにはパスワードを入力してください。</p>
-        <input type="password" id="password" placeholder="Password">
-        <br>
-        <button onclick="checkPassword()">Enter</button>
-        <p id="error-msg" style="color: red; display: none;">パスワードが正しくありません。</p>
+    <div id="password-overlay">
+        <div class="login-box">
+            <h3>Private Access</h3>
+            <input type="password" id="pass-input" placeholder="Password">
+            <br>
+            <button onclick="checkPassword()">Unlock</button>
+        </div>
     </div>
 
     <div id="main-content">
-        <h1>My Personal Space</h1>
+        <header>
+            <h1>PORTFOLIO</h1>
+            <p>Welcome to my simple space.</p>
+        </header>
 
-        <nav class="toc">
-            <strong>目次</strong>
+        <div class="toc-container">
+            <strong>Contents</strong>
             <ul>
-                <li><a href="#section1">1. プロフィール (折り畳み)</a></li>
-                <li><a href="#section2">2. プロジェクト (タブ)</a></li>
-                <li><a href="#section3">3. 外部リンク</a></li>
+                <li><a href="#section1">01. Profile</a></li>
+                <li><a href="#section2">02. Works</a></li>
+                <li><a href="#section3">03. Contact</a></li>
             </ul>
-        </nav>
+        </div>
 
-        <h2 id="section1">1. プロフィール</h2>
-        <p>ここは <span class="accent-text">spanタグ</span> を使った装飾の例です。</p>
-        
-        <details>
-            <summary>詳細情報を表示する</summary>
-            <div style="padding-top: 10px;">
-                この部分は折り畳み（details/summary）を使用しています。
-                普段は隠しておきたい情報を入れるのに最適です。
+        <section id="section1">
+            <h2>Profile</h2>
+            <p>
+                <span>ミニマリスト</span>なデザインを好むクリエイターです。<br>
+                アクセントカラーの<span style="color: var(--accent); font-weight: bold;">#008CC8</span>を基調としています。
+            </p>
+        </section>
+
+        <section id="section2">
+            <h2>Works</h2>
+            <div class="tabs">
+                <div class="tab-buttons">
+                    <div class="tab-btn active" onclick="openTab(event, 'tab-a')">Project A</div>
+                    <div class="tab-btn" onclick="openTab(event, 'tab-b')">Project B</div>
+                </div>
+                <div id="tab-a" class="tab-panel active">
+                    <p>プロジェクトAの詳細です。Webサイトの構築を行いました。</p>
+                </div>
+                <div id="tab-b" class="tab-panel">
+                    <p>プロジェクトBの詳細です。UI/UXデザインを担当しました。</p>
+                </div>
             </div>
-        </details>
+        </section>
 
-        <h2 id="section2">2. プロジェクト</h2>
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'tab1')">Work A</button>
-            <button class="tab-button" onclick="openTab(event, 'tab2')">Work B</button>
-        </div>
-        <div id="tab1" class="tab-content active">
-            <h3>Work A について</h3>
-            <p>アクセントカラー <span style="color:#008CC8;">#008CC8</span> を使用したタブコンテンツです。</p>
-        </div>
-        <div id="tab2" class="tab-content">
-            <h3>Work B について</h3>
-            <p>タブを切り替えることで表示内容が変わります。</p>
-        </div>
+        <section id="section3">
+            <h2>Contact</h2>
+            <details>
+                <summary>SNS / Email</summary>
+                <div class="details-content">
+                    <p>Twitter: <a href="#">@your_id</a></p>
+                    <p>Email: <a href="mailto:info@example.com">info@example.com</a></p>
+                </div>
+            </details>
+        </section>
 
-        <h2 id="section3">3. 外部リンク</h2>
-        <ul>
-            <li><a href="https://google.com" target="_blank">Google で検索する</a></li>
-            <li><a href="#">自身のSNSリンクなど</a></li>
-        </ul>
-
-        <footer style="margin-top: 50px; font-size: 0.8em; text-align: center;">
-            &copy; 2024 Personal Web Page
+        <footer>
+            <p>&copy; 2026 Personal Web Site</p>
         </footer>
     </div>
-</div>
 
-<script>
-    // パスワードチェック機能
-    function checkPassword() {
-        const pass = document.getElementById('password').value;
-        const correctPass = "1234"; // ← ここに好きなパスワードを設定してください
-
-        if (pass === correctPass) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
+    <script>
+        // パスワードチェック機能
+        function checkPassword() {
+            const pass = document.getElementById('pass-input').value;
+            // ここでパスワードを設定してください
+            if (pass === '1234') { 
+                document.getElementById('password-overlay').style.removeProperty('display');
+                document.getElementById('password-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                alert('パスワードが正しくありません');
+            }
         }
-    }
 
-    // タブ切り替え機能
-    function openTab(evt, tabName) {
-        const tabContents = document.getElementsByClassName("tab-content");
-        for (let i = 0; i < tabContents.length; i++) {
-            tabContents[i].style.display = "none";
-            tabContents[i].classList.remove("active");
+        // タブ切り替え機能
+        function openTab(evt, tabId) {
+            const panels = document.getElementsByClassName("tab-panel");
+            for (let i = 0; i < panels.length; i++) {
+                panels[i].classList.remove("active");
+            }
+            const buttons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
         }
-        const tabButtons = document.getElementsByClassName("tab-button");
-        for (let i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].classList.remove("active");
-        }
-        document.getElementById(tabName).style.display = "block";
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
-    }
-</script>
 
+        // Enterキーでもパスワード送信できるようにする
+        document.getElementById('pass-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+    </script>
 </body>
 </html>
