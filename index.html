@@ -3,179 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Memo</title>
+    <title>Personal Portal</title>
     <style>
-        /* 基本設定 */
+        /* 基本スタイル */
         body {
             background-color: #EDEDED;
             color: #000000;
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+            line-height: 1.6;
             margin: 0;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
 
         .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 40px 20px;
+            width: 90%;
+            max-width: 800px;
+            margin: 40px 0;
+            padding: 20px;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 30px;
-            border-left: 4px solid #008CC8;
-            padding-left: 15px;
+        /* 認証画面 */
+        #login-screen {
+            text-align: center;
+            margin-top: 10vh;
         }
 
-        /* 入力エリア */
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
+        input[type="password"] {
+            padding: 10px;
             border: 1px solid #000000;
-            background-color: #FFFFFF;
-            font-size: 1rem;
-            outline: none;
+            background: #FFF;
+            margin-bottom: 10px;
+            width: 200px;
         }
 
-        input[type="text"]:focus {
-            box-shadow: 0 0 0 2px #008CC8;
-        }
-
-        button#add-btn {
-            padding: 0 20px;
+        button {
+            padding: 10px 20px;
             background-color: #000000;
             color: #EDEDED;
             border: none;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
+            transition: opacity 0.3s;
         }
 
-        button#add-btn:hover {
-            background-color: #008CC8;
+        button:hover {
+            opacity: 0.8;
         }
 
-        /* メモ一覧 */
-        ul {
-            list-style: none;
-            padding: 0;
+        /* コンテンツ（初期は非表示） */
+        #main-content {
+            display: none;
         }
 
-        li {
-            background-color: #FFFFFF;
-            border-bottom: 1px solid #000000;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* 見出し */
+        h1 { border-bottom: 2px solid #000000; padding-bottom: 10px; }
+        h2 { color: #008CC8; border-left: 4px solid #008CC8; padding-left: 10px; margin-top: 30px; }
+
+        /* リンク */
+        a { color: #008CC8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* 目次 */
+        .toc {
+            background: #FFF;
+            padding: 20px;
+            border: 1px solid #000000;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc li { margin-bottom: 5px; }
+
+        /* 折り畳み (Details) */
+        details {
+            background: #FFF;
+            border: 1px solid #000000;
+            padding: 10px;
             margin-bottom: 10px;
-            animation: fadeIn 0.3s ease;
         }
+        summary { cursor: pointer; font-weight: bold; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .memo-text {
-            word-break: break-all;
-            line-height: 1.5;
-        }
-
-        .delete-btn {
-            background: none;
+        /* タブ */
+        .tabs { display: flex; border-bottom: 2px solid #000000; margin-top: 20px; }
+        .tab-button {
+            padding: 10px 20px;
             border: none;
-            color: #008CC8;
+            background: none;
             cursor: pointer;
-            font-size: 0.8rem;
             font-weight: bold;
-            padding: 5px;
-            margin-left: 10px;
-            white-space: nowrap;
         }
+        .tab-button.active {
+            background-color: #008CC8;
+            color: #FFF;
+        }
+        .tab-content {
+            display: none;
+            background: #FFF;
+            padding: 20px;
+            border: 1px solid #000000;
+            border-top: none;
+        }
+        .tab-content.active { display: block; }
 
-        .delete-btn:hover {
-            text-decoration: underline;
-        }
+        /* ユーティリティ */
+        .accent-text { color: #008CC8; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>MEMO</h1>
-    
-    <div class="input-group">
-        <input type="text" id="memo-input" placeholder="新しいメモを入力..." autocomplete="off">
-        <button id="add-btn">追加</button>
+    <div id="login-screen">
+        <h1>Private Page</h1>
+        <p>コンテンツを表示するにはパスワードを入力してください。</p>
+        <input type="password" id="password" placeholder="Password">
+        <br>
+        <button onclick="checkPassword()">Enter</button>
+        <p id="error-msg" style="color: red; display: none;">パスワードが正しくありません。</p>
     </div>
 
-    <ul id="memo-list"></ul>
+    <div id="main-content">
+        <h1>My Personal Space</h1>
+
+        <nav class="toc">
+            <strong>目次</strong>
+            <ul>
+                <li><a href="#section1">1. プロフィール (折り畳み)</a></li>
+                <li><a href="#section2">2. プロジェクト (タブ)</a></li>
+                <li><a href="#section3">3. 外部リンク</a></li>
+            </ul>
+        </nav>
+
+        <h2 id="section1">1. プロフィール</h2>
+        <p>ここは <span class="accent-text">spanタグ</span> を使った装飾の例です。</p>
+        
+        <details>
+            <summary>詳細情報を表示する</summary>
+            <div style="padding-top: 10px;">
+                この部分は折り畳み（details/summary）を使用しています。
+                普段は隠しておきたい情報を入れるのに最適です。
+            </div>
+        </details>
+
+        <h2 id="section2">2. プロジェクト</h2>
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'tab1')">Work A</button>
+            <button class="tab-button" onclick="openTab(event, 'tab2')">Work B</button>
+        </div>
+        <div id="tab1" class="tab-content active">
+            <h3>Work A について</h3>
+            <p>アクセントカラー <span style="color:#008CC8;">#008CC8</span> を使用したタブコンテンツです。</p>
+        </div>
+        <div id="tab2" class="tab-content">
+            <h3>Work B について</h3>
+            <p>タブを切り替えることで表示内容が変わります。</p>
+        </div>
+
+        <h2 id="section3">3. 外部リンク</h2>
+        <ul>
+            <li><a href="https://google.com" target="_blank">Google で検索する</a></li>
+            <li><a href="#">自身のSNSリンクなど</a></li>
+        </ul>
+
+        <footer style="margin-top: 50px; font-size: 0.8em; text-align: center;">
+            &copy; 2024 Personal Web Page
+        </footer>
+    </div>
 </div>
 
 <script>
-    const memoInput = document.getElementById('memo-input');
-    const addBtn = document.getElementById('add-btn');
-    const memoList = document.getElementById('memo-list');
+    // パスワードチェック機能
+    function checkPassword() {
+        const pass = document.getElementById('password').value;
+        const correctPass = "1234"; // ← ここに好きなパスワードを設定してください
 
-    // 初期読み込み
-    window.onload = () => {
-        const savedMemos = JSON.parse(localStorage.getItem('my_memos')) || [];
-        savedMemos.forEach(text => createMemoElement(text));
-    };
-
-    // メモ追加関数
-    function addMemo() {
-        const text = memoInput.value.trim();
-        if (text) {
-            createMemoElement(text);
-            saveMemos();
-            memoInput.value = '';
+        if (pass === correctPass) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        } else {
+            document.getElementById('error-msg').style.display = 'block';
         }
     }
 
-    // 要素作成
-    function createMemoElement(text) {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span class="memo-text">${escapeHtml(text)}</span>
-            <button class="delete-btn">削除</button>
-        `;
-
-        li.querySelector('.delete-btn').addEventListener('click', () => {
-            li.remove();
-            saveMemos();
-        });
-
-        memoList.appendChild(li);
+    // タブ切り替え機能
+    function openTab(evt, tabName) {
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].style.display = "none";
+            tabContents[i].classList.remove("active");
+        }
+        const tabButtons = document.getElementsByClassName("tab-button");
+        for (let i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
     }
-
-    // 保存
-    function saveMemos() {
-        const texts = Array.from(document.querySelectorAll('.memo-text')).map(span => span.innerText);
-        localStorage.setItem('my_memos', JSON.stringify(texts));
-    }
-
-    // XSS対策用エスケープ
-    function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, function(m) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-        });
-    }
-
-    // イベントリスナー
-    addBtn.addEventListener('click', addMemo);
-    memoInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addMemo();
-    });
 </script>
 
 </body>
