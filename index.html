@@ -1,90 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Progate</title>
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Memo</title>
+    <style>
+        /* 基本設定 */
+        body {
+            background-color: #EDEDED;
+            color: #000000;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border-left: 4px solid #008CC8;
+            padding-left: 15px;
+        }
+
+        /* 入力エリア */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #000000;
+            background-color: #FFFFFF;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 0 2px #008CC8;
+        }
+
+        button#add-btn {
+            padding: 0 20px;
+            background-color: #000000;
+            color: #EDEDED;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        button#add-btn:hover {
+            background-color: #008CC8;
+        }
+
+        /* メモ一覧 */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #000000;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .memo-text {
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #008CC8;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 5px;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <div class="header-left">
-        <img class="logo" src="https://prog-8.com/images/html/advanced/main_logo.png">
-      </div>
-      <span class="fa fa-bars menu-icon"></span>
-      <div class="header-right">
-        <a href="#">レッスン</a>
-        <a href="#">新規登録</a>
-        <a href="#" class="login">ログイン</a>
-      </div>
+
+<div class="container">
+    <h1>MEMO</h1>
+    
+    <div class="input-group">
+        <input type="text" id="memo-input" placeholder="新しいメモを入力..." autocomplete="off">
+        <button id="add-btn">追加</button>
     </div>
-  </header>
-  <div class="top-wrapper">
-    <div class="container">
-      <h1>LEARN TO CODE.<br>LEARN TO BE CREATIVE.</h1>
-      <p>Progateはオンラインプログラミング学習サービスです。<br>初心者にもやさしいスライドとレッスンで、ウェブサービスを作りながらプログラミングを学んでいきましょう。</p>
-      <div class="btn-wrapper">
-        <a href="#" class="btn signup">新規登録はこちら</a>
-        <p>or</p>
-        <a href="#" class="btn facebook"><span class="fa fa-facebook"></span>Facebookで登録</a>
-        <a href="#" class="btn twitter"><span class="fa fa-twitter"></span>Twitterで登録</a>
-      </div>
-    </div>
-  </div>
-  <div class="lesson-wrapper">
-    <div class="container">
-      <div class="heading">
-        <h2>Learn Where to Get Started!</h2>
-      </div>
-      <div class="lessons">
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/html.png">
-            <p>HTML & CSS</p>
-          </div>
-          <p class="text-contents">ウェブページの作成に使用される言語です。HTMLとCSSを組み合わせることで、静的なページを作り上げることができます。</p>
-        </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/jQuery.png">
-            <p>jQuery</p>
-          </div>
-          <p class="text-contents">素敵な動きを手軽に実装できるJavaScriptライブラリです。 アニメーション効果をつけたり、Ajax（エイジャックス）を使って外部ファイルを読み込んだりと色々なことができます。</p>
-        </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/ruby.png">
-            <p>Ruby</p>
-          </div>
-          <p class="text-contents">オープンソースの動的なプログラミング言語で、 シンプルさと高い生産性を備えています。大きなWebアプリケーションから小さな日用ツールまで、さまざまなソフトウェアを作ることができます。</p>
-        </div>
-        <div class="lesson">
-          <div class="lesson-icon">
-            <img src="https://prog-8.com/images/html/advanced/php.png">
-            <p>PHP</p>
-          </div>
-          <p class="text-contents">HTMLだけではページの内容を変えることはできません。PHPはHTMLにプログラムを埋め込み、それを可能にします。</p>
-        </div>
-      </div>
-      <div class="clear"></div>
-    </div>
-  </div>
-  <div class="message-wrapper">
-    <div class="container">
-      <div class="heading">
-        <h2>さぁ、あなたもProgateでプログラミングを学んでみませんか?</h2>
-        <h3>Let's learn to code, learn to be creative!</h3>
-      </div>
-      <span class="btn message">さっそく開発する</span>
-    </div>
-  </div>
-  <footer>
-    <div class="container">
-      <img src="https://prog-8.com/images/html/advanced/footer_logo.png">
-      <p>Learn to Code, Learn to be Creative.</p>
-    </div>
-  </footer>
+
+    <ul id="memo-list"></ul>
+</div>
+
+<script>
+    const memoInput = document.getElementById('memo-input');
+    const addBtn = document.getElementById('add-btn');
+    const memoList = document.getElementById('memo-list');
+
+    // 初期読み込み
+    window.onload = () => {
+        const savedMemos = JSON.parse(localStorage.getItem('my_memos')) || [];
+        savedMemos.forEach(text => createMemoElement(text));
+    };
+
+    // メモ追加関数
+    function addMemo() {
+        const text = memoInput.value.trim();
+        if (text) {
+            createMemoElement(text);
+            saveMemos();
+            memoInput.value = '';
+        }
+    }
+
+    // 要素作成
+    function createMemoElement(text) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span class="memo-text">${escapeHtml(text)}</span>
+            <button class="delete-btn">削除</button>
+        `;
+
+        li.querySelector('.delete-btn').addEventListener('click', () => {
+            li.remove();
+            saveMemos();
+        });
+
+        memoList.appendChild(li);
+    }
+
+    // 保存
+    function saveMemos() {
+        const texts = Array.from(document.querySelectorAll('.memo-text')).map(span => span.innerText);
+        localStorage.setItem('my_memos', JSON.stringify(texts));
+    }
+
+    // XSS対策用エスケープ
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+    }
+
+    // イベントリスナー
+    addBtn.addEventListener('click', addMemo);
+    memoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addMemo();
+    });
+</script>
+
 </body>
 </html>
