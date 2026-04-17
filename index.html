@@ -70,7 +70,13 @@
         
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
-        .sidebar-header { padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 10px; align-items: center; }
+        #workspace-title-input { 
+            flex-grow: 1; background: transparent; border: none; font-weight: 600; color: inherit; 
+            font-family: inherit; font-size: 1em; outline: none; padding: 5px; border-radius: 4px;
+        }
+        #workspace-title-input:focus { background: var(--btn-hover); }
+
         .page-list { flex-grow: 1; overflow-y: auto; list-style: none; }
         .page-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
         .page-item:hover { background-color: var(--btn-hover); }
@@ -91,24 +97,19 @@
         #content-wrapper { flex-grow: 1; padding: 40px 30px calc(60px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
         #view-area { line-height: 1.8; max-width: 800px; margin: 0 auto; word-break: break-word; }
         
-        /* 見出しスタイル */
         #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1.5em 0 0.8em; }
         #view-area h2 { font-size: 1.5em; margin: 1.2em 0 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; }
         #view-area h3 { font-size: 1.25em; margin: 1em 0 0.5em; }
 
-        /* 目次スタイル */
         .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 20px; margin: 20px 0; border-radius: 8px; display: inline-block; min-width: 250px; max-width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .toc-title { font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .toc-list { list-style: none; font-size: 0.9em; }
         .toc-item { margin: 8px 0; }
-        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; transition: opacity 0.2s; }
-        .toc-link:hover { opacity: 0.7; }
+        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; }
 
-        /* Wikidot系スタイル */
         #view-area blockquote { border-left: 4px solid var(--quote-border); padding-left: 15px; margin: 1em 0; color: #666; background: var(--quote-bg); padding: 10px 15px; border-radius: 0 6px 6px 0; }
         .wiki-collapsible { margin: 1em 0; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: var(--code-bg); }
-        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; user-select: none; }
-        .wiki-collapsible summary:hover { text-decoration: underline; }
+        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; }
         .collapsible-content { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
 
         #edit-area { display: none; width: 100%; height: 100%; min-height: 70vh; background: transparent; color: inherit; border: none; outline: none; font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6; }
@@ -128,7 +129,7 @@
 
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
-            <span>Workspace</span>
+            <input type="text" id="workspace-title-input" value="Workspace" onchange="app.saveWorkspaceTitle(this.value)">
             <button class="icon-btn" onclick="app.closeSidebar()">✕</button>
         </div>
         <ul class="page-list" id="page-list"></ul>
@@ -162,7 +163,7 @@
             currentPageId: null,
             isEditing: false,
             isSharedMode: false,
-            sharedRawData: null,
+            workspaceTitle: "Workspace",
 
             init() {
                 this.cacheDOM();
@@ -178,6 +179,7 @@
                     overlay: document.getElementById('sidebar-overlay'),
                     pageList: document.getElementById('page-list'),
                     titleInput: document.getElementById('current-page-title'),
+                    wsTitleInput: document.getElementById('workspace-title-input'),
                     viewArea: document.getElementById('view-area'),
                     editArea: document.getElementById('edit-area'),
                     editBtn: document.getElementById('edit-toggle-btn'),
@@ -204,11 +206,7 @@
 
                 if (hash.startsWith('#share=')) {
                     this.isSharedMode = true;
-                    const raw = hash.replace('#share=', '');
-                    if (this.sharedRawData !== raw) {
-                        this.sharedRawData = raw;
-                        this.loadSharedData(raw);
-                    }
+                    this.loadSharedData(hash.replace('#share=', ''));
                     return;
                 }
 
@@ -221,6 +219,7 @@
                 this.dom.sidebarActions.style.display = 'flex';
                 this.dom.editBtn.style.display = 'flex';
                 this.dom.titleInput.readOnly = false;
+                this.dom.wsTitleInput.readOnly = false;
                 
                 this.loadLocalData();
 
@@ -233,37 +232,39 @@
                 }
             },
 
-            // 初回起動時のスタイルリソース（Wikidot構文集）を作成
             createDefaultResourcePage() {
                 const resourceContent = `[[toc]]
 
-+ テキスト装飾
++ 新機能：エスケープ構文
+\`@@\` で囲むと、その中の構文は解析されず、そのまま表示されます。
+例： @@**太字にしない**@@ や @@[[toc]]@@
+
++ 新機能：サイドバータイトルの変更
+サイドバー最上部の「Workspace」と書かれた部分は、クリックして自由に書き換えることができます。
+変更したタイトルは共有リンクにも反映されます。
+
++ Wikidot風構文リソース
+++ テキスト装飾
 **太字 (Bold)**
 //斜体 (Italic)//
 __下線 (Underline)__
 --取り消し線 (Strikethrough)--
 
-+ 見出しと目次
-文頭に \`+\` を置くことで見出しになります。
+++ 見出しと目次
+文頭に \`+\` を置くことで見出しになります。最大 \`++++++\` まで対応。
 \`[[toc]]\` と記述すると、ページ内の見出しから自動的に目次が生成されます。
 
-++ 見出し2 (H2)
-+++ 見出し3 (H3)
-
-+ カスタムブロック (Div)
+++ カスタムブロック (Div)
 [[div style="border: 2px solid var(--accent-color); padding: 15px; border-radius: 8px;"]]
 \`[[div]]\` 〜 \`[[/div]]\` を使用して、HTMLのdivタグを生成できます。
-直接スタイルやクラスを当て込む際に便利です。
 [[/div]]
 
-+ 引用 (Blockquote)
+++ 引用 (Blockquote)
 > 行頭に \`>\` を置くことで引用ブロックになります。
-> 複数行にわたって記述できます。
 
-+ 折りたたみ (Collapsible)
+++ 折りたたみ (Collapsible)
 [[collapsible show="+ 詳細を開く" hide="- 閉じる"]]
 \`[[collapsible]]\` と \`[[/collapsible]]\` で囲んだ部分は折りたたまれます。
-長文のログや、補足情報を隠しておくのに適しています。
 [[/collapsible]]`;
 
                 this.addPage("スタイルリソース", resourceContent);
@@ -272,11 +273,16 @@ __下線 (Underline)__
             loadSharedData(encoded) {
                 try {
                     const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-                    this.pages = Array.isArray(decoded) ? decoded : [decoded];
+                    this.pages = decoded.pages;
+                    this.workspaceTitle = decoded.wsTitle || "Workspace";
+                    this.dom.wsTitleInput.value = this.workspaceTitle;
+                    
                     this.isSharedMode = true;
                     this.dom.sidebarActions.style.display = 'none';
                     this.dom.editBtn.style.display = 'none';
                     this.dom.titleInput.readOnly = true;
+                    this.dom.wsTitleInput.readOnly = true;
+                    
                     this.renderSidebar();
                     this.switchPage(this.pages[0].id, false);
                     this.showToast("共有ビューを表示中");
@@ -288,8 +294,16 @@ __下線 (Underline)__
 
             loadLocalData() {
                 const data = localStorage.getItem('personal_workspace_data_v5');
+                const title = localStorage.getItem('personal_workspace_title');
                 this.pages = data ? JSON.parse(data) : [];
+                this.workspaceTitle = title || "Workspace";
+                this.dom.wsTitleInput.value = this.workspaceTitle;
                 this.renderSidebar();
+            },
+
+            saveWorkspaceTitle(val) {
+                this.workspaceTitle = val;
+                if(!this.isSharedMode) localStorage.setItem('personal_workspace_title', val);
             },
 
             renderSidebar() {
@@ -297,7 +311,6 @@ __下線 (Underline)__
                 this.pages.forEach(page => {
                     const li = document.createElement('li');
                     li.className = `page-item ${page.id === this.currentPageId ? 'active' : ''}`;
-                    
                     if (!this.isSharedMode) {
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
@@ -306,7 +319,6 @@ __下線 (Underline)__
                         cb.onclick = e => e.stopPropagation();
                         li.appendChild(cb);
                     }
-
                     const span = document.createElement('span');
                     span.className = 'page-title-text';
                     span.textContent = page.title || "無題";
@@ -314,7 +326,6 @@ __下線 (Underline)__
                         this.switchPage(page.id, true);
                         if(window.innerWidth <= 768) this.closeSidebar();
                     };
-
                     li.appendChild(span);
                     this.dom.pageList.appendChild(li);
                 });
@@ -323,71 +334,64 @@ __下線 (Underline)__
             switchPage(id, updateHash) {
                 const page = this.pages.find(p => p.id === id);
                 if (!page) return;
-
                 if (this.isEditing) this.toggleEditMode();
-                
                 this.currentPageId = id;
                 this.dom.titleInput.value = page.title;
                 this.dom.editArea.value = page.content;
                 this.dom.viewArea.innerHTML = this.parseFTML(page.content);
-                
                 this.renderSidebar();
-                if (updateHash && !this.isSharedMode) {
-                    window.location.hash = '#page=' + id;
-                }
+                if (updateHash && !this.isSharedMode) window.location.hash = '#page=' + id;
             },
 
-            // 大幅に強化したWikidot構文パーサー
             parseFTML(text) {
                 if (!text) return '';
                 let html = text;
                 const headings = [];
+                const escapes = [];
 
-                // 1. カスタムDiv
+                // 1. エスケープ処理 (@@...@@)
+                html = html.replace(/@@(.*?)@@/g, (match, content) => {
+                    const placeholder = `__ESC_${escapes.length}__`;
+                    escapes.push(content);
+                    return placeholder;
+                });
+
+                // 2. 構文パース
                 html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
                 html = html.replace(/\[\[\/div\]\]/gi, '</div>');
-
-                // 2. 折りたたみ (Collapsible)
-                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (match, show, hide) => {
-                    const summaryText = show || '+ 開く';
-                    return `<details class="wiki-collapsible"><summary>${summaryText}</summary><div class="collapsible-content">`;
+                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (match, show) => {
+                    return `<details class="wiki-collapsible"><summary>${show || '+ 開く'}</summary><div class="collapsible-content">`;
                 });
                 html = html.replace(/\[\[\/collapsible\]\]/gi, '</div></details>');
-
-                // 3. 見出し (Headings) & TOC用データ収集
                 html = html.replace(/^(\+{1,6})\s+(.*?)$/gm, (match, levelStr, title) => {
                     const level = levelStr.length;
                     const id = "h-" + Math.random().toString(36).substr(2, 9);
                     headings.push({ level, title, id });
                     return `<h${level} id="${id}">${title}</h${level}>`;
                 });
-
-                // 4. インライン装飾
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
                 html = html.replace(/__(.*?)__/g, '<u>$1</u>');
                 html = html.replace(/--(.*?)--/g, '<del>$1</del>');
-
-                // 5. 引用 (Blockquote)
                 html = html.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
-
-                // 6. 改行処理
                 html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
-                // 見出しやDiv周りの不要な改行を軽くクリーニング
                 html = html.replace(/<br><h/g, '<h');
                 html = html.replace(/<\/h(\d)><br>/g, '</h$1>');
 
-                // 7. TOC (目次) の生成と挿入
-                // リンククリック時にURLハッシュを変更せず、JavaScriptでスクロールさせることで共有URL等との競合を防ぎます
+                // 3. TOC生成
                 if (html.includes('[[toc]]')) {
                     let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
                     headings.forEach(h => {
-                        const indent = (h.level - 1) * 16;
-                        tocHtml += `<li class="toc-item" style="margin-left:${indent}px"><span class="toc-link" onclick="document.getElementById('${h.id}').scrollIntoView()">${h.title}</span></li>`;
+                        tocHtml += `<li class="toc-item" style="margin-left:${(h.level-1)*16}px"><span class="toc-link" onclick="document.getElementById('${h.id}').scrollIntoView()">${h.title}</span></li>`;
                     });
                     tocHtml += '</ul></div>';
                     html = html.replace('[[toc]]', tocHtml);
                 }
+
+                // 4. エスケープの復元
+                escapes.forEach((content, i) => {
+                    html = html.replace(`__ESC_${i}__`, content);
+                });
 
                 return html;
             },
@@ -405,7 +409,9 @@ __下線 (Underline)__
             },
 
             saveData() {
-                if(!this.isSharedMode) localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
+                if(!this.isSharedMode) {
+                    localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
+                }
             },
 
             toggleEditMode() {
@@ -436,9 +442,13 @@ __下線 (Underline)__
             shareSelectedPages() {
                 const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(c => c.dataset.id);
                 if (ids.length === 0) return this.showToast("ページを選択してください");
-                const data = this.pages.filter(p => ids.includes(p.id));
-                const url = window.location.origin + window.location.pathname + '#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-                navigator.clipboard.writeText(url).then(() => this.showToast("共有リンクをコピーしました"));
+                const selectedPages = this.pages.filter(p => ids.includes(p.id));
+                const payload = {
+                    wsTitle: this.workspaceTitle,
+                    pages: selectedPages
+                };
+                const url = window.location.origin + window.location.pathname + '#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+                navigator.clipboard.writeText(url).then(() => this.showToast("タイトルと選択ページを共有リンクにしました"));
             }
         };
 
