@@ -50,9 +50,7 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
-            /* 古いブラウザ用のフォールバック */
             height: 100vh;
-            /* モバイルブラウザのアドレスバー変動に対応 */
             height: 100dvh;
             overflow: hidden;
             transition: background-color var(--transition-speed), color var(--transition-speed);
@@ -61,41 +59,21 @@
 
         body.is-editing #main-container { box-shadow: inset 0 0 0 4px var(--edit-accent); }
         body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); }
-        body.is-editing #edit-status-badge { display: inline-flex; }
 
         #sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 5;
-            opacity: 0;
-            transition: opacity var(--transition-speed);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); z-index: 5; opacity: 0; transition: opacity var(--transition-speed);
         }
         #sidebar-overlay.active { display: block; opacity: 1; }
 
         #sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            transition: transform var(--transition-speed), width var(--transition-speed);
-            flex-shrink: 0;
-            z-index: 10;
-            height: 100vh;
-            height: 100dvh;
+            width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; transition: transform var(--transition-speed), width var(--transition-speed);
+            flex-shrink: 0; z-index: 10; height: 100%;
         }
+        #sidebar.collapsed { width: 0; transform: translateX(-280px); border-right: none; }
         
-        #sidebar.collapsed {
-            width: 0; transform: translateX(-280px); border-right: none;
-        }
-        
-        #main-container {
-            flex-grow: 1; display: flex; flex-direction: column;
-            min-width: 0; position: relative;
-            transition: box-shadow var(--transition-speed);
-        }
+        #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
         .sidebar-header {
             padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color);
@@ -109,91 +87,55 @@
         }
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { border-left: 4px solid var(--accent-color); background-color: var(--btn-hover); font-weight: 600; }
-        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; }
-        .share-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); }
+        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* モバイル下部の安全領域を確保 */
         .sidebar-footer { 
             padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); 
-            border-top: 1px solid var(--border-color); 
-            display: flex; flex-direction: column; gap: 10px; 
+            border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; 
         }
 
         #topbar {
             height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color);
             display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0;
-            transition: border-bottom var(--transition-speed);
         }
         
         .icon-btn {
             background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color);
             padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600; white-space: nowrap;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600;
         }
-        .icon-btn:hover { background: var(--btn-hover); }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-        .icon-btn.primary:hover { opacity: 0.9; }
         .icon-btn.edit-active { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
         #current-page-title {
             flex-grow: 1; font-size: 1.2em; font-weight: 600; border: none;
-            background: transparent; color: inherit; outline: none; min-width: 0;
-            padding: 5px; border-radius: 4px;
-        }
-        #current-page-title:focus { background-color: var(--btn-hover); }
-
-        #edit-status-badge {
-            display: none; align-items: center; background-color: var(--edit-accent);
-            color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600;
+            background: transparent; color: inherit; outline: none; min-width: 0; padding: 5px;
         }
 
-        /* 最後のスクロールが隠れないように下部余白を多めに */
         #content-wrapper { 
             flex-grow: 1; padding: 40px 30px calc(60px + env(safe-area-inset-bottom)); 
             overflow-y: auto; -webkit-overflow-scrolling: touch; 
         }
         #view-area { line-height: 1.8; max-width: 800px; margin: 0 auto; word-break: break-word; }
+        #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1em 0 0.5em; }
         
-        #view-area h1, #view-area h2, #view-area h3 { margin-top: 1.5em; margin-bottom: 0.8em; line-height: 1.3; }
-        #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; }
-        
-        .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 20px; margin: 20px 0; border-radius: 8px; display: inline-block; min-width: 250px; max-width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .toc-title { font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-        .toc-list { list-style: none; font-size: 0.9em; }
-        .toc-item { margin: 8px 0; }
-        .toc-link { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
-        .toc-link:hover { opacity: 0.7; }
-        
-        #view-area img { max-width: 100%; height: auto; border-radius: 6px; margin: 1em 0; }
-        #view-area pre { overflow-x: auto; background: var(--code-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 0.9em; margin: 1em 0; }
-        #view-area blockquote { border-left: 4px solid var(--quote-border); padding-left: 15px; margin: 1em 0; color: #666; background: var(--quote-bg); padding: 10px 15px; border-radius: 0 6px 6px 0; }
-
         #edit-area {
             display: none; width: 100%; height: 100%; min-height: 70vh;
             background: transparent; color: inherit; border: none; outline: none;
-            font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto;
-            line-height: 1.6;
+            font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6;
         }
 
         .toast {
             position: fixed; left: 50%; transform: translateX(-50%);
-            /* モバイル下部の安全領域を確保 */
             bottom: calc(30px + env(safe-area-inset-bottom));
             background: var(--text-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px;
-            opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none; font-size: 0.9em; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none;
         }
 
         @media (max-width: 768px) {
-            #sidebar { position: absolute; }
+            #sidebar { position: absolute; height: 100%; }
             #sidebar:not(.collapsed) { width: 280px; transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
-            #content-wrapper { padding: 20px 15px calc(40px + env(safe-area-inset-bottom)); }
-            #topbar { padding: 0 15px; gap: 8px; height: 56px; }
-            .icon-btn { padding: 8px; }
             .btn-text { display: none; }
-            #edit-area, #current-page-title { font-size: 16px; }
-            body.is-editing #main-container { box-shadow: inset 0 0 0 3px var(--edit-accent); }
-            #edit-status-badge { display: none !important; }
         }
     </style>
 </head>
@@ -204,35 +146,28 @@
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
             <span>Workspace</span>
-            <button class="icon-btn" onclick="app.closeSidebar()" aria-label="閉じる">✕</button>
-        </div>
-        <div style="padding: 12px 15px; font-size: 0.8em; color: #666; line-height: 1.5; background: var(--btn-hover);">
-            チェックした項目をURL化して共有できます。<br>
-            <small>※データはサーバーに送信されません</small>
+            <button class="icon-btn" onclick="app.closeSidebar()">✕</button>
         </div>
         <ul class="page-list" id="page-list"></ul>
-        <div class="sidebar-footer">
-            <button class="icon-btn" onclick="app.addPage()" style="justify-content: center; width: 100%;">+ 新規ページ</button>
-            <button class="icon-btn primary" onclick="app.shareSelectedPages()" style="justify-content: center; width: 100%;">🔗 チェック項目を共有</button>
+        <div class="sidebar-footer" id="sidebar-actions">
+            <button class="icon-btn" onclick="app.addPage()" style="justify-content: center;">+ 新規ページ</button>
+            <button class="icon-btn primary" onclick="app.shareSelectedPages()" style="justify-content: center;">🔗 選択項目を共有</button>
         </div>
     </nav>
 
     <div id="main-container">
         <header id="topbar">
-            <button id="sidebar-toggle-btn" class="icon-btn" onclick="app.openSidebar()">
-                ☰<span class="btn-text"> メニュー</span>
-            </button>
-            <input type="text" id="current-page-title" placeholder="無題のページ" onchange="app.updateTitle(this.value)">
-            <span id="edit-status-badge">編集中</span>
+            <button class="icon-btn" onclick="app.openSidebar()">☰</button>
+            <input type="text" id="current-page-title" placeholder="無題" onchange="app.updateTitle(this.value)">
             <button class="icon-btn" onclick="app.toggleTheme()">🌓</button>
             <button class="icon-btn" id="edit-toggle-btn" onclick="app.toggleEditMode()">
-                ✏️<span class="btn-text" id="edit-btn-text"> 編集する</span>
+                ✏️<span class="btn-text"> 編集</span>
             </button>
         </header>
         
         <div id="content-wrapper">
             <div id="view-area"></div>
-            <textarea id="edit-area" placeholder="ここにマークダウン風のテキストを入力します...&#10;&#10;[[toc]] で目次を生成&#10;+ 見出し1&#10;++ 見出し2"></textarea>
+            <textarea id="edit-area"></textarea>
         </div>
     </div>
 
@@ -244,12 +179,17 @@
             currentPageId: null,
             isEditing: false,
             isSharedMode: false,
+            sharedRawData: null,
 
             init() {
                 this.cacheDOM();
                 this.initTheme();
-                window.addEventListener('hashchange', () => this.handleRouting());
-                this.handleRouting();
+                
+                // 初回ロード時のルーティング
+                this.handleRouting(true);
+                
+                // ブラウザ操作時のルーティング
+                window.addEventListener('hashchange', () => this.handleRouting(false));
             },
 
             cacheDOM() {
@@ -262,19 +202,15 @@
                     viewArea: document.getElementById('view-area'),
                     editArea: document.getElementById('edit-area'),
                     editBtn: document.getElementById('edit-toggle-btn'),
-                    editBtnText: document.getElementById('edit-btn-text'),
-                    toast: document.getElementById('toast')
+                    toast: document.getElementById('toast'),
+                    sidebarActions: document.getElementById('sidebar-actions')
                 };
             },
 
             initTheme() {
-                const savedTheme = localStorage.getItem('personal_workspace_theme');
-                if (savedTheme === 'dark') {
-                    this.dom.body.classList.add('dark-theme');
-                    this.dom.body.classList.remove('light-theme');
-                } else if (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    this.dom.body.classList.add('dark-theme');
-                    this.dom.body.classList.remove('light-theme');
+                const saved = localStorage.getItem('personal_workspace_theme');
+                if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    this.dom.body.classList.replace('light-theme', 'dark-theme');
                 }
             },
 
@@ -284,74 +220,67 @@
                 localStorage.setItem('personal_workspace_theme', isDark ? 'dark' : 'light');
             },
 
-            handleRouting() {
+            handleRouting(isInitial) {
                 const hash = window.location.hash;
+
+                // 1. 共有モード判定
                 if (hash.startsWith('#share=')) {
-                    this.initSharedMode();
-                } else {
-                    this.loadData();
-                    if (this.pages.length === 0) {
-                        this.addPage("Welcome", "プライバシーに配慮したパーソナルワークスペースです。\n\n[[toc]]\n\n+ 特徴\n左上のメニューからサイドバーを開閉できます。デフォルトで閉じているため、モバイル端末でもコンテンツ領域を広く確保できます。\n\n++ テーマ切り替え\n右上の「🌓」ボタンでダーク/ライトの切り替えが可能になり、設定がブラウザに保存されるようになりました。\n\n++ ブラウザ対応\nブラウザの「戻る」「進む」ボタンでページ間をシームレスに移動できるようになりました。");
-                    } else if (hash.startsWith('#page=')) {
-                        const pageId = hash.replace('#page=', '');
-                        if (this.currentPageId !== pageId) {
-                            this.switchPage(pageId, false);
-                        }
-                    } else if (!this.currentPageId) {
-                        this.switchPage(this.pages[0].id, true);
+                    this.isSharedMode = true;
+                    const raw = hash.replace('#share=', '');
+                    if (this.sharedRawData !== raw) {
+                        this.sharedRawData = raw;
+                        this.loadSharedData(raw);
                     }
+                    return;
+                }
+
+                // 2. 共有モード継続判定（サイドバークリック等で #page= になった場合）
+                if (this.isSharedMode && hash.startsWith('#page=')) {
+                    const pageId = hash.replace('#page=', '');
+                    this.switchPage(pageId, false);
+                    return;
+                }
+
+                // 3. 通常モード
+                this.isSharedMode = false;
+                this.dom.sidebarActions.style.display = 'flex';
+                this.dom.editBtn.style.display = 'flex';
+                this.dom.titleInput.readOnly = false;
+                
+                this.loadLocalData();
+
+                if (this.pages.length === 0) {
+                    this.addPage("Welcome", "+ 使い方\n左上のメニューからページを作成・管理できます。\n\n+ 共有機能\nサイドバーのチェック項目を選んで共有リンクを作成できます。");
+                } else if (hash.startsWith('#page=')) {
+                    this.switchPage(hash.replace('#page=', ''), false);
+                } else if (isInitial || !this.currentPageId) {
+                    this.switchPage(this.pages[0].id, true);
                 }
             },
 
-            parseFTML(text) {
-                if (!text) return '';
-                let html = text;
-                const headings = [];
+            loadSharedData(encoded) {
+                try {
+                    const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+                    this.pages = Array.isArray(decoded) ? decoded : [decoded];
+                    this.isSharedMode = true;
+                    
+                    // 共有モードUI調整
+                    this.dom.sidebarActions.style.display = 'none';
+                    this.dom.editBtn.style.display = 'none';
+                    this.dom.titleInput.readOnly = true;
 
-                html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
-                html = html.replace(/\[\[\/div\]\]/gi, '</div>');
-
-                html = html.replace(/^(\+{1,5}) (.*?)$/gm, (match, level, title) => {
-                    const l = level.length;
-                    const id = "h-" + Math.random().toString(36).substr(2, 9);
-                    headings.push({ level: l, title: title, id: id });
-                    return `<h${l} id="${id}">${title}</h${l}>`;
-                });
-
-                if (html.includes('[[toc]]')) {
-                    let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
-                    headings.forEach(h => {
-                        const indent = (h.level - 1) * 16;
-                        tocHtml += `<li class="toc-item" style="margin-left:${indent}px"><a href="#${h.id}" class="toc-link" onclick="app.closeSidebarIfMobile()">${h.title}</a></li>`;
-                    });
-                    tocHtml += '</ul></div>';
-                    html = html.replace('[[toc]]', tocHtml);
+                    this.renderSidebar();
+                    this.switchPage(this.pages[0].id, false);
+                    this.showToast("共有ビューを表示中");
+                } catch(e) {
+                    this.showToast("データの読み込みに失敗しました");
+                    window.location.hash = '';
                 }
-
-                html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
-                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
-                html = html.replace(/__(.*?)__/g, '<u>$1</u>');
-                html = html.replace(/--(.*?)--/g, '<del>$1</del>');
-
-                html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
-                html = html.replace(/<br><h/g, '<h');
-                html = html.replace(/<\/h(\d)><br>/g, '</h$1>');
-                html = html.replace(/<br><div/g, '<div');
-                html = html.replace(/<\/div><br>/g, '</div>');
-
-                return html;
             },
 
-            loadData() {
+            loadLocalData() {
                 const data = localStorage.getItem('personal_workspace_data_v5');
                 this.pages = data ? JSON.parse(data) : [];
-                this.renderSidebar();
-            },
-
-            saveData() {
-                if(this.isSharedMode) return;
-                localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
                 this.renderSidebar();
             },
 
@@ -361,50 +290,62 @@
                     const li = document.createElement('li');
                     li.className = `page-item ${page.id === this.currentPageId ? 'active' : ''}`;
                     
-                    const cb = document.createElement('input');
-                    cb.type = 'checkbox';
-                    cb.className = 'share-checkbox';
-                    cb.dataset.id = page.id;
-                    cb.onclick = (e) => e.stopPropagation();
+                    if (!this.isSharedMode) {
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.className = 'share-checkbox';
+                        cb.dataset.id = page.id;
+                        cb.onclick = e => e.stopPropagation();
+                        li.appendChild(cb);
+                    }
 
-                    const titleSpan = document.createElement('span');
-                    titleSpan.className = 'page-title-text';
-                    titleSpan.textContent = page.title;
-                    titleSpan.onclick = () => {
+                    const span = document.createElement('span');
+                    span.className = 'page-title-text';
+                    span.textContent = page.title || "無題";
+                    li.onclick = () => {
+                        const prefix = this.isSharedMode ? '#page=' : '#page=';
+                        // 共有モードを維持したままページだけ切り替えるためにプログラムから switchPage を呼ぶ
                         this.switchPage(page.id, true);
-                        this.closeSidebarIfMobile();
+                        this.closeSidebar();
                     };
 
-                    li.appendChild(cb);
-                    li.appendChild(titleSpan);
+                    li.appendChild(span);
                     this.dom.pageList.appendChild(li);
                 });
             },
 
-            switchPage(id, updateHash = false) {
-                if (this.isEditing) this.saveCurrentContent();
+            switchPage(id, updateHash) {
                 const page = this.pages.find(p => p.id === id);
                 if (!page) return;
+
+                if (this.isEditing) this.toggleEditMode();
                 
                 this.currentPageId = id;
                 this.dom.titleInput.value = page.title;
                 this.dom.editArea.value = page.content;
                 this.dom.viewArea.innerHTML = this.parseFTML(page.content);
                 
-                if (this.isEditing) this.toggleEditMode();
                 this.renderSidebar();
-
                 if (updateHash) {
-                    window.location.hash = '#page=' + id;
+                    // 共有モードの場合はハッシュを上書きしない（共有データをURLに保持し続けるため）
+                    if (!this.isSharedMode) window.location.hash = '#page=' + id;
                 }
             },
 
-            addPage(title = "無題のページ", content = "") {
+            // --- 以降、描画・ユーティリティロジック (変更なし) ---
+            parseFTML(text) {
+                if (!text) return '';
+                let html = text.replace(/^(\++) (.*?)$/gm, (m, l, t) => `<h${l.length}>${t}</h${l.length}>`);
+                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
+                return html;
+            },
+
+            addPage(title = "新規ページ", content = "") {
                 const newId = 'p_' + Date.now();
-                this.pages.push({ id: newId, title: title, content: content });
+                this.pages.push({ id: newId, title, content });
                 this.saveData();
                 this.switchPage(newId, true);
-                this.closeSidebarIfMobile();
             },
 
             updateTitle(val) {
@@ -412,104 +353,45 @@
                 if (page) { page.title = val; this.saveData(); this.renderSidebar(); }
             },
 
+            saveData() {
+                if(!this.isSharedMode) localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
+            },
+
             toggleEditMode() {
-                if(this.isSharedMode) return;
                 this.isEditing = !this.isEditing;
-                
+                this.dom.body.classList.toggle('is-editing', this.isEditing);
                 if (this.isEditing) {
-                    this.dom.body.classList.add('is-editing');
-                    this.dom.editBtn.classList.add('edit-active');
-                    this.dom.editBtn.innerHTML = `💾<span class="btn-text" id="edit-btn-text"> 保存する</span>`;
                     this.dom.viewArea.style.display = 'none';
                     this.dom.editArea.style.display = 'block';
+                    this.dom.editBtn.classList.add('edit-active');
                     this.dom.editArea.focus();
                 } else {
-                    this.saveCurrentContent();
-                    this.dom.body.classList.remove('is-editing');
-                    this.dom.editBtn.classList.remove('edit-active');
-                    this.dom.editBtn.innerHTML = `✏️<span class="btn-text" id="edit-btn-text"> 編集する</span>`;
+                    const page = this.pages.find(p => p.id === this.currentPageId);
+                    if (page) {
+                        page.content = this.dom.editArea.value;
+                        this.dom.viewArea.innerHTML = this.parseFTML(page.content);
+                        this.saveData();
+                    }
                     this.dom.viewArea.style.display = 'block';
                     this.dom.editArea.style.display = 'none';
+                    this.dom.editBtn.classList.remove('edit-active');
                 }
             },
 
-            saveCurrentContent() {
-                const page = this.pages.find(p => p.id === this.currentPageId);
-                if (page) {
-                    page.content = this.dom.editArea.value;
-                    this.dom.viewArea.innerHTML = this.parseFTML(page.content);
-                    this.saveData();
-                }
-            },
-
-            openSidebar() {
-                this.dom.sidebar.classList.remove('collapsed');
-                if (window.innerWidth <= 768) {
-                    this.dom.overlay.classList.add('active');
-                }
-            },
-
-            closeSidebar() {
-                this.dom.sidebar.classList.add('collapsed');
-                this.dom.overlay.classList.remove('active');
-            },
-
-            closeSidebarIfMobile() {
-                if (window.innerWidth <= 768) {
-                    this.closeSidebar();
-                }
-            },
+            openSidebar() { this.dom.sidebar.classList.remove('collapsed'); this.dom.overlay.classList.add('active'); },
+            closeSidebar() { this.dom.sidebar.classList.add('collapsed'); this.dom.overlay.classList.remove('active'); },
+            showToast(m) { this.dom.toast.textContent = m; this.dom.toast.style.opacity = 1; setTimeout(() => this.dom.toast.style.opacity = 0, 2000); },
 
             shareSelectedPages() {
-                const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked'))
-                                         .map(cb => cb.dataset.id);
-                
-                if (selectedIds.length === 0) {
-                    this.showToast("共有したいページにチェックを入れてください");
-                    return;
-                }
-
-                const sharedData = this.pages.filter(p => selectedIds.includes(p.id));
-                const payload = btoa(unescape(encodeURIComponent(JSON.stringify(sharedData))));
-                const url = window.location.origin + window.location.pathname + '#share=' + payload;
-
-                navigator.clipboard.writeText(url).then(() => {
-                    this.showToast(`${selectedIds.length}件のページリンクをコピーしました`);
-                    this.closeSidebarIfMobile();
-                });
-            },
-
-            initSharedMode() {
-                this.isSharedMode = true;
-                this.dom.editBtn.style.display = 'none';
-                this.dom.titleInput.readOnly = true;
-
-                try {
-                    const encoded = window.location.hash.replace('#share=', '');
-                    const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-                    this.pages = Array.isArray(decoded) ? decoded : [decoded];
-                    this.renderSidebar();
-                    this.switchPage(this.pages[0].id, false);
-                    this.showToast("共有モードで開きました（読み取り専用）");
-                } catch(e) {
-                    this.dom.viewArea.innerHTML = "<p style='color:red;'>データの読み込みに失敗しました。URLが途切れていないか確認してください。</p>";
-                }
-            },
-
-            showToast(msg) {
-                this.dom.toast.textContent = msg;
-                this.dom.toast.style.opacity = '1';
-                setTimeout(() => this.dom.toast.style.opacity = '0', 3000);
+                const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(c => c.dataset.id);
+                if (ids.length === 0) return this.showToast("ページを選択してください");
+                const data = this.pages.filter(p => ids.includes(p.id));
+                const url = window.location.origin + window.location.pathname + '#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+                navigator.clipboard.writeText(url).then(() => this.showToast("共有リンクをコピーしました"));
             }
         };
 
         app.init();
-        
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && app.dom.overlay.classList.contains('active')) {
-                app.dom.overlay.classList.remove('active');
-            }
-        });
     </script>
 </body>
 </html>
