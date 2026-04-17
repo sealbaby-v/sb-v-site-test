@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Personal Workspace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,9 +36,6 @@
             }
         }
 
-        body.light-theme { /* Classes for manual override if needed */ }
-        body.dark-theme { /* Classes for manual override if needed */ }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: var(--font-main);
@@ -50,7 +47,22 @@
             transition: background-color var(--transition-speed);
         }
 
-        /* サイドバー初期状態: 折り畳み */
+        /* モバイル用オーバーレイ（背景を暗くする） */
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+        #sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* サイドバー */
         #sidebar {
             width: 280px;
             background-color: var(--sidebar-bg);
@@ -60,7 +72,10 @@
             transition: transform var(--transition-speed), width var(--transition-speed);
             flex-shrink: 0;
             z-index: 10;
+            height: 100vh;
         }
+        
+        /* 初期状態・折りたたみ時のクラス */
         #sidebar.collapsed {
             width: 0;
             transform: translateX(-280px);
@@ -76,123 +91,116 @@
         }
 
         .sidebar-header {
-            padding: 20px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
+            padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
         .page-list { flex-grow: 1; overflow-y: auto; list-style: none; }
         .page-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s;
+            padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 10px; transition: background 0.2s;
         }
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { border-left: 4px solid var(--accent-color); background-color: var(--btn-hover); }
-        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* 共有用チェックボックス */
-        .share-checkbox { width: 16px; height: 16px; cursor: pointer; }
+        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
+        .share-checkbox { width: 18px; height: 18px; cursor: pointer; }
 
-        .sidebar-footer {
-            padding: 10px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .sidebar-footer { padding: 10px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
 
         /* Topbar */
         #topbar {
-            height: 60px;
-            background-color: var(--topbar-bg);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 10px;
+            height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 15px; gap: 10px; flex-shrink: 0;
         }
         .icon-btn {
             background: none; border: 1px solid var(--border-color); color: var(--text-color);
-            padding: 6px 10px; border-radius: 6px; cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; gap: 4px; font-size: 0.9rem;
+            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; gap: 6px; font-size: 0.9rem; white-space: nowrap;
         }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         
         #current-page-title {
             flex-grow: 1; font-size: 1.1rem; font-weight: 600; border: none;
-            background: transparent; color: inherit; outline: none;
+            background: transparent; color: inherit; outline: none; min-width: 0;
         }
 
-        #edit-indicator {
-            background-color: var(--edit-banner-bg); color: var(--edit-banner-text);
-            text-align: center; padding: 5px; font-size: 0.8rem; display: none;
-        }
+        #edit-indicator { background-color: var(--edit-banner-bg); color: var(--edit-banner-text); text-align: center; padding: 6px; font-size: 0.8rem; display: none; }
 
         /* Content Area */
-        #content-wrapper { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        #view-area { line-height: 1.8; max-width: 850px; margin: 0 auto; }
+        #content-wrapper { flex-grow: 1; padding: 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #view-area { line-height: 1.8; max-width: 850px; margin: 0 auto; word-break: break-word; }
         
-        /* 目次 (TOC) スタイル */
-        .toc-container {
-            background: var(--toc-bg);
-            border: 1px solid var(--border-color);
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            display: inline-block;
-            min-width: 250px;
-        }
-        .toc-title { font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+        /* 目次 */
+        .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 15px; margin-bottom: 30px; border-radius: 8px; display: inline-block; min-width: 200px; max-width: 100%; }
+        .toc-title { font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
         .toc-list { list-style: none; font-size: 0.9rem; }
-        .toc-item { margin: 4px 0; }
+        .toc-item { margin: 6px 0; }
         .toc-link { color: var(--accent-color); text-decoration: none; }
-        .toc-link:hover { text-decoration: underline; }
+        
+        #view-area img { max-width: 100%; height: auto; border-radius: 4px; }
+        #view-area pre { overflow-x: auto; background: var(--code-bg); padding: 10px; border-radius: 6px; }
 
         #edit-area {
-            display: none; width: 100%; height: 100%; min-height: 600px;
+            display: none; width: 100%; height: 100%; min-height: 60vh;
             background: transparent; color: inherit; border: none; outline: none;
             font-family: monospace; font-size: 1rem; resize: none; max-width: 850px; margin: 0 auto;
         }
 
-        body.shared-mode #sidebar-toggle-btn { display: none; }
-        /* 共有モードでもサイドバー（共有されたページリスト）は見せる必要があるため非表示にはしない */
-
         .toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: #333; color: #fff; padding: 10px 20px; border-radius: 20px;
-            opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none;
+            opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none; font-size: 0.9rem; white-space: nowrap;
+        }
+
+        /* 📱 モバイル対応 (レスポンシブデザイン) */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute; /* モバイルではコンテンツの上に重ねる */
+            }
+            #sidebar:not(.collapsed) {
+                width: 280px;
+                transform: translateX(0);
+                box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+            }
+            #content-wrapper { padding: 20px 15px; }
+            #topbar { padding: 0 10px; gap: 8px; }
+            #current-page-title { font-size: 1rem; }
+            .icon-btn { padding: 8px; }
+            .btn-text { display: none; } /* モバイル時はボタンのテキストを隠しアイコンのみにする */
+            
+            /* 編集エリアのフォントサイズが小さいとiOSでズームされるのを防ぐ */
+            #edit-area, #current-page-title { font-size: 16px; } 
         }
     </style>
 </head>
 <body class="light-theme">
 
+    <div id="sidebar-overlay" onclick="app.closeSidebar()"></div>
+
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
             <span>Pages</span>
-            <button class="icon-btn" onclick="app.toggleSidebar()">✕</button>
+            <button class="icon-btn" onclick="app.closeSidebar()">✕</button>
         </div>
-        <div style="padding: 10px; font-size: 0.75rem; opacity: 0.7;">
+        <div style="padding: 10px 15px; font-size: 0.75rem; opacity: 0.7; line-height: 1.4;">
             チェックしたページをまとめて共有できます
         </div>
         <ul class="page-list" id="page-list"></ul>
         <div class="sidebar-footer">
-            <button class="icon-btn" onclick="app.addPage()" style="justify-content: center;">+ 新規ページ</button>
-            <button class="icon-btn primary" onclick="app.shareSelectedPages()" style="justify-content: center;">🔗 選択したページを共有</button>
+            <button class="icon-btn" onclick="app.addPage()" style="justify-content: center;">+ 新規</button>
+            <button class="icon-btn primary" onclick="app.shareSelectedPages()" style="justify-content: center;">🔗 共有</button>
         </div>
     </nav>
 
     <div id="main-container">
         <header id="topbar">
-            <button id="sidebar-toggle-btn" class="icon-btn" onclick="app.toggleSidebar()">☰ Menu</button>
+            <button id="sidebar-toggle-btn" class="icon-btn" onclick="app.openSidebar()">
+                ☰<span class="btn-text"> Menu</span>
+            </button>
             <input type="text" id="current-page-title" placeholder="タイトルなし" onchange="app.updateTitle(this.value)">
             <button class="icon-btn" onclick="app.toggleTheme()">🌓</button>
-            <button class="icon-btn primary" id="edit-toggle-btn" onclick="app.toggleEditMode()">✏️ 編集</button>
+            <button class="icon-btn primary" id="edit-toggle-btn" onclick="app.toggleEditMode()">
+                ✏️<span class="btn-text" id="edit-btn-text"> 編集</span>
+            </button>
         </header>
         
         <div id="edit-indicator">編集モード: [[toc]] で目次を生成できます。</div>
@@ -220,7 +228,7 @@
                 } else {
                     this.loadData();
                     if (this.pages.length === 0) {
-                        this.addPage("Welcome", "+ 目次のテスト\n[[toc]]\n\n+ セクション1\n内容1\n++ サブセクション\n内容1-1\n+ セクション2\n内容2");
+                        this.addPage("Welcome", "+ モバイル対応テスト\n[[toc]]\n\nスマートフォンでも見やすいように最適化されました。左上のメニューからサイドバーを開けます。\n\n++ 見出しの例\n内容を記述します。");
                     } else {
                         this.switchPage(this.pages[0].id);
                     }
@@ -230,30 +238,28 @@
             cacheDOM() {
                 this.dom = {
                     sidebar: document.getElementById('sidebar'),
+                    overlay: document.getElementById('sidebar-overlay'),
                     pageList: document.getElementById('page-list'),
                     titleInput: document.getElementById('current-page-title'),
                     viewArea: document.getElementById('view-area'),
                     editArea: document.getElementById('edit-area'),
                     editBtn: document.getElementById('edit-toggle-btn'),
+                    editBtnText: document.getElementById('edit-btn-text'),
                     editIndicator: document.getElementById('edit-indicator'),
                     toast: document.getElementById('toast')
                 };
             },
 
-            // ===== FTML Parser (目次機能追加) =====
             parseFTML(text) {
                 if (!text) return '';
                 let html = text;
                 const headings = [];
 
-                // 1. [[div/span]]
                 html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
                 html = html.replace(/\[\[\/div\]\]/gi, '</div>');
                 html = html.replace(/\[\[span(.*?)\]\]/gi, '<span$1>');
                 html = html.replace(/\[\[\/span\]\]/gi, '</span>');
 
-                // 2. Headings & ID generation for TOC
-                // 行頭の + をループで処理してアンカーを作成
                 html = html.replace(/^(\+{1,5}) (.*?)$/gm, (match, level, title) => {
                     const l = level.length;
                     const id = "header-" + Math.random().toString(36).substr(2, 9);
@@ -261,18 +267,16 @@
                     return `<h${l} id="${id}">${title}</h${l}>`;
                 });
 
-                // 3. [[toc]] の置換
                 if (html.includes('[[toc]]')) {
                     let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
                     headings.forEach(h => {
-                        const indent = (h.level - 1) * 20;
-                        tocHtml += `<li class="toc-item" style="margin-left:${indent}px"><a href="#${h.id}" class="toc-link">${h.title}</a></li>`;
+                        const indent = (h.level - 1) * 15; // モバイル考慮でインデント幅を微調整
+                        tocHtml += `<li class="toc-item" style="margin-left:${indent}px"><a href="#${h.id}" class="toc-link" onclick="app.closeSidebarIfMobile()">${h.title}</a></li>`;
                     });
                     tocHtml += '</ul></div>';
                     html = html.replace('[[toc]]', tocHtml);
                 }
 
-                // 4. Decorations & Blocks
                 html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
@@ -283,14 +287,14 @@
             },
 
             loadData() {
-                const data = localStorage.getItem('personal_workspace_data_v2');
+                const data = localStorage.getItem('personal_workspace_data_v3');
                 this.pages = data ? JSON.parse(data) : [];
                 this.renderSidebar();
             },
 
             saveData() {
                 if(this.isSharedMode) return;
-                localStorage.setItem('personal_workspace_data_v2', JSON.stringify(this.pages));
+                localStorage.setItem('personal_workspace_data_v3', JSON.stringify(this.pages));
                 this.renderSidebar();
             },
 
@@ -300,7 +304,6 @@
                     const li = document.createElement('li');
                     li.className = `page-item ${page.id === this.currentPageId ? 'active' : ''}`;
                     
-                    // 共有用チェックボックス
                     const cb = document.createElement('input');
                     cb.type = 'checkbox';
                     cb.className = 'share-checkbox';
@@ -310,7 +313,10 @@
                     const titleSpan = document.createElement('span');
                     titleSpan.className = 'page-title-text';
                     titleSpan.textContent = page.title;
-                    titleSpan.onclick = () => this.switchPage(page.id);
+                    titleSpan.onclick = () => {
+                        this.switchPage(page.id);
+                        this.closeSidebarIfMobile();
+                    };
 
                     li.appendChild(cb);
                     li.appendChild(titleSpan);
@@ -336,7 +342,8 @@
                 this.pages.push({ id: newId, title: title, content: content });
                 this.saveData();
                 this.switchPage(newId);
-                this.toggleSidebar(false); // サイドバーを開く
+                this.closeSidebarIfMobile();
+                if(!this.isEditing) this.toggleEditMode();
             },
 
             updateTitle(val) {
@@ -364,14 +371,31 @@
                 this.dom.viewArea.style.display = this.isEditing ? 'none' : 'block';
                 this.dom.editArea.style.display = this.isEditing ? 'block' : 'none';
                 this.dom.editIndicator.style.display = this.isEditing ? 'block' : 'none';
-                this.dom.editBtn.textContent = this.isEditing ? '💾 保存' : '✏️ 編集';
+                
+                // モバイル時にアイコンの隣の文字が消えることへの対応
+                if(this.dom.editBtnText) {
+                    this.dom.editBtnText.textContent = this.isEditing ? ' 保存' : ' 編集';
+                }
+                this.dom.editBtn.innerHTML = this.isEditing 
+                    ? `💾<span class="btn-text" id="edit-btn-text"> 保存</span>` 
+                    : `✏️<span class="btn-text" id="edit-btn-text"> 編集</span>`;
             },
 
-            toggleSidebar(forceState) {
-                if (typeof forceState === 'boolean') {
-                    this.dom.sidebar.classList.toggle('collapsed', forceState);
-                } else {
-                    this.dom.sidebar.classList.toggle('collapsed');
+            openSidebar() {
+                this.dom.sidebar.classList.remove('collapsed');
+                if (window.innerWidth <= 768) {
+                    this.dom.overlay.classList.add('active');
+                }
+            },
+
+            closeSidebar() {
+                this.dom.sidebar.classList.add('collapsed');
+                this.dom.overlay.classList.remove('active');
+            },
+
+            closeSidebarIfMobile() {
+                if (window.innerWidth <= 768) {
+                    this.closeSidebar();
                 }
             },
 
@@ -380,7 +404,6 @@
                 document.body.classList.toggle('light-theme', !isDark);
             },
 
-            // ===== 複数ページ共有機能 =====
             shareSelectedPages() {
                 const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked'))
                                          .map(cb => cb.dataset.id);
@@ -395,7 +418,8 @@
                 const url = window.location.origin + window.location.pathname + '#share=' + payload;
 
                 navigator.clipboard.writeText(url).then(() => {
-                    this.showToast(selectedIds.length + "件のページをリンクとしてコピーしました");
+                    this.showToast(selectedIds.length + "件のページをリンクコピーしました");
+                    this.closeSidebarIfMobile();
                 });
             },
 
@@ -403,7 +427,6 @@
                 this.isSharedMode = true;
                 document.body.classList.add('shared-mode');
                 this.dom.editBtn.style.display = 'none';
-                this.dom.sidebar.classList.remove('collapsed'); // 共有時はリストを見せる
 
                 try {
                     const encoded = window.location.hash.replace('#share=', '');
@@ -424,6 +447,13 @@
         };
 
         app.init();
+        
+        // 画面サイズが変更された時のオーバーレイの調整
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && app.dom.overlay.classList.contains('active')) {
+                app.dom.overlay.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>
