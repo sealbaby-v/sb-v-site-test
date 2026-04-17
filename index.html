@@ -70,12 +70,17 @@
         
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
-        .sidebar-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 10px; align-items: center; }
-        #workspace-title-input { 
-            flex-grow: 1; background: transparent; border: none; font-weight: 600; color: inherit; 
-            font-family: inherit; font-size: 1em; outline: none; padding: 5px; border-radius: 4px;
+        .sidebar-header { 
+            padding: 15px 20px; border-bottom: 1px solid var(--border-color); 
+            display: flex; flex-direction: column; gap: 8px;
         }
-        #workspace-title-input:focus { background: var(--btn-hover); }
+        #workspace-title-input {
+            background: transparent; border: 1px solid transparent; color: inherit;
+            font-weight: 600; font-size: 1.1em; width: 100%; padding: 4px; border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        #workspace-title-input:hover:not([readonly]) { border-color: var(--border-color); }
+        #workspace-title-input:focus { background: var(--btn-bg); border-color: var(--accent-color); outline: none; }
 
         .page-list { flex-grow: 1; overflow-y: auto; list-style: none; }
         .page-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
@@ -84,7 +89,7 @@
         .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; }
         .share-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); }
 
-        .sidebar-footer { padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
+        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
 
         #topbar { height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
         
@@ -105,11 +110,12 @@
         .toc-title { font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .toc-list { list-style: none; font-size: 0.9em; }
         .toc-item { margin: 8px 0; }
-        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; }
+        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; transition: opacity 0.2s; }
+        .toc-link:hover { opacity: 0.7; }
 
         #view-area blockquote { border-left: 4px solid var(--quote-border); padding-left: 15px; margin: 1em 0; color: #666; background: var(--quote-bg); padding: 10px 15px; border-radius: 0 6px 6px 0; }
         .wiki-collapsible { margin: 1em 0; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: var(--code-bg); }
-        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; }
+        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; user-select: none; }
         .collapsible-content { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
 
         #edit-area { display: none; width: 100%; height: 100%; min-height: 70vh; background: transparent; color: inherit; border: none; outline: none; font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6; }
@@ -129,8 +135,11 @@
 
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
-            <input type="text" id="workspace-title-input" value="Workspace" onchange="app.saveWorkspaceTitle(this.value)">
-            <button class="icon-btn" onclick="app.closeSidebar()">✕</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-size: 0.75em; color: #666;">WORKSPACE TITLE</span>
+                <button class="icon-btn" onclick="app.closeSidebar()" style="padding: 4px 8px; border: none; background: transparent;">✕</button>
+            </div>
+            <input type="text" id="workspace-title-input" value="Workspace" onchange="app.updateWorkspaceTitle(this.value)">
         </div>
         <ul class="page-list" id="page-list"></ul>
         <div class="sidebar-footer" id="sidebar-actions">
@@ -160,10 +169,11 @@
     <script>
         const app = {
             pages: [],
+            workspaceTitle: "Workspace",
             currentPageId: null,
             isEditing: false,
             isSharedMode: false,
-            workspaceTitle: "Workspace",
+            sharedRawData: null,
 
             init() {
                 this.cacheDOM();
@@ -206,7 +216,11 @@
 
                 if (hash.startsWith('#share=')) {
                     this.isSharedMode = true;
-                    this.loadSharedData(hash.replace('#share=', ''));
+                    const raw = hash.replace('#share=', '');
+                    if (this.sharedRawData !== raw) {
+                        this.sharedRawData = raw;
+                        this.loadSharedData(raw);
+                    }
                     return;
                 }
 
@@ -233,61 +247,61 @@
             },
 
             createDefaultResourcePage() {
-                const resourceContent = `[[toc]]
+                const content = `[[toc]]
 
-+ 新機能：エスケープ構文
-\`@@\` で囲むと、その中の構文は解析されず、そのまま表示されます。
-例： @@**太字にしない**@@ や @@[[toc]]@@
++ 1. 特殊構文: エスケープ
+\`@@\` で囲むと、中の文字は構文として処理されずそのまま表示されます。
+例: @@**この太字構文は無効化されます**@@
 
-+ 新機能：サイドバータイトルの変更
-サイドバー最上部の「Workspace」と書かれた部分は、クリックして自由に書き換えることができます。
-変更したタイトルは共有リンクにも反映されます。
++ 2. テキスト装飾
+**太字 (Bold)** : \`**text**\`
+//斜体 (Italic)// : \`//text//\`
+__下線 (Underline)__ : \`__text__\`
+--取り消し線 (Strike)-- : \`--text--\`
 
-+ Wikidot風構文リソース
-++ テキスト装飾
-**太字 (Bold)**
-//斜体 (Italic)//
-__下線 (Underline)__
---取り消し線 (Strikethrough)--
++ 3. 見出し
+行頭に \`+\` を追加します。数はレベルに対応します。
+\`+ 見出し1\`
+\`++ 見出し2\`
+\`+++ 見出し3\`
 
-++ 見出しと目次
-文頭に \`+\` を置くことで見出しになります。最大 \`++++++\` まで対応。
-\`[[toc]]\` と記述すると、ページ内の見出しから自動的に目次が生成されます。
++ 4. Wikidot風ブロック
+++ 折りたたみ (Collapsible)
+[[collapsible show="+ 詳細を表示" hide="- 閉じる"]]
+折りたたまれる内容です。
+[[/collapsible]]
 
-++ カスタムブロック (Div)
-[[div style="border: 2px solid var(--accent-color); padding: 15px; border-radius: 8px;"]]
-\`[[div]]\` 〜 \`[[/div]]\` を使用して、HTMLのdivタグを生成できます。
+++ カスタムDivブロック
+[[div style="background: #eef; padding: 10px; border-radius: 5px; color: #333;"]]
+スタイルを指定したブロックを作成できます。
 [[/div]]
 
-++ 引用 (Blockquote)
-> 行頭に \`>\` を置くことで引用ブロックになります。
++ 5. 引用
+> 行頭に \`>\` を置きます。
 
-++ 折りたたみ (Collapsible)
-[[collapsible show="+ 詳細を開く" hide="- 閉じる"]]
-\`[[collapsible]]\` と \`[[/collapsible]]\` で囲んだ部分は折りたたまれます。
-[[/collapsible]]`;
++ 6. 目次
+\`[[toc]]\` と書くと、ページ内の見出しから自動生成されます。`;
 
-                this.addPage("スタイルリソース", resourceContent);
+                this.addPage("スタイルリソース", content);
             },
 
             loadSharedData(encoded) {
                 try {
                     const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-                    this.pages = decoded.pages;
-                    this.workspaceTitle = decoded.wsTitle || "Workspace";
-                    this.dom.wsTitleInput.value = this.workspaceTitle;
+                    this.pages = decoded.pages || (Array.isArray(decoded) ? decoded : [decoded]);
+                    this.workspaceTitle = decoded.wsTitle || "Shared Workspace";
                     
-                    this.isSharedMode = true;
+                    this.dom.wsTitleInput.value = this.workspaceTitle;
+                    this.dom.wsTitleInput.readOnly = true;
                     this.dom.sidebarActions.style.display = 'none';
                     this.dom.editBtn.style.display = 'none';
                     this.dom.titleInput.readOnly = true;
-                    this.dom.wsTitleInput.readOnly = true;
-                    
+
                     this.renderSidebar();
                     this.switchPage(this.pages[0].id, false);
                     this.showToast("共有ビューを表示中");
                 } catch(e) {
-                    this.showToast("データの読み込みに失敗しました");
+                    this.showToast("データの読み込みに失敗");
                     window.location.hash = '';
                 }
             },
@@ -299,11 +313,6 @@ __下線 (Underline)__
                 this.workspaceTitle = title || "Workspace";
                 this.dom.wsTitleInput.value = this.workspaceTitle;
                 this.renderSidebar();
-            },
-
-            saveWorkspaceTitle(val) {
-                this.workspaceTitle = val;
-                if(!this.isSharedMode) localStorage.setItem('personal_workspace_title', val);
             },
 
             renderSidebar() {
@@ -347,28 +356,29 @@ __下線 (Underline)__
                 if (!text) return '';
                 let html = text;
                 const headings = [];
-                const escapes = [];
 
-                // 1. エスケープ処理 (@@...@@)
-                html = html.replace(/@@(.*?)@@/g, (match, content) => {
-                    const placeholder = `__ESC_${escapes.length}__`;
-                    escapes.push(content);
+                // 1. エスケープ構文 @@...@@ を一時退避
+                const escapedContent = [];
+                html = html.replace(/@@(.*?)@@/g, (m, p1) => {
+                    const placeholder = `__ESCAPED_${escapedContent.length}__`;
+                    escapedContent.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
                     return placeholder;
                 });
 
-                // 2. 構文パース
+                // 2. Wikidot構文パース
                 html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
                 html = html.replace(/\[\[\/div\]\]/gi, '</div>');
-                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (match, show) => {
-                    return `<details class="wiki-collapsible"><summary>${show || '+ 開く'}</summary><div class="collapsible-content">`;
-                });
+                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (m, s, h) => 
+                    `<details class="wiki-collapsible"><summary>${s || '+ 開く'}</summary><div class="collapsible-content">`);
                 html = html.replace(/\[\[\/collapsible\]\]/gi, '</div></details>');
-                html = html.replace(/^(\+{1,6})\s+(.*?)$/gm, (match, levelStr, title) => {
-                    const level = levelStr.length;
-                    const id = "h-" + Math.random().toString(36).substr(2, 9);
-                    headings.push({ level, title, id });
-                    return `<h${level} id="${id}">${title}</h${level}>`;
+
+                html = html.replace(/^(\+{1,6})\s+(.*?)$/gm, (m, l, t) => {
+                    const level = l.length;
+                    const id = "h-" + Math.random().toString(36).substr(2, 5);
+                    headings.push({ level, title: t, id });
+                    return `<h${level} id="${id}">${t}</h${level}>`;
                 });
+
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
                 html = html.replace(/__(.*?)__/g, '<u>$1</u>');
@@ -384,16 +394,20 @@ __下線 (Underline)__
                     headings.forEach(h => {
                         tocHtml += `<li class="toc-item" style="margin-left:${(h.level-1)*16}px"><span class="toc-link" onclick="document.getElementById('${h.id}').scrollIntoView()">${h.title}</span></li>`;
                     });
-                    tocHtml += '</ul></div>';
-                    html = html.replace('[[toc]]', tocHtml);
+                    html = html.replace('[[toc]]', tocHtml + '</ul></div>');
                 }
 
-                // 4. エスケープの復元
-                escapes.forEach((content, i) => {
-                    html = html.replace(`__ESC_${i}__`, content);
+                // 4. 退避していたエスケープ内容を戻す
+                escapedContent.forEach((content, i) => {
+                    html = html.replace(`__ESCAPED_${i}__`, content);
                 });
 
                 return html;
+            },
+
+            updateWorkspaceTitle(val) {
+                this.workspaceTitle = val;
+                if(!this.isSharedMode) localStorage.setItem('personal_workspace_title', val);
             },
 
             addPage(title = "新規ページ", content = "") {
@@ -409,9 +423,7 @@ __下線 (Underline)__
             },
 
             saveData() {
-                if(!this.isSharedMode) {
-                    localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
-                }
+                if(!this.isSharedMode) localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
             },
 
             toggleEditMode() {
@@ -442,13 +454,12 @@ __下線 (Underline)__
             shareSelectedPages() {
                 const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(c => c.dataset.id);
                 if (ids.length === 0) return this.showToast("ページを選択してください");
-                const selectedPages = this.pages.filter(p => ids.includes(p.id));
-                const payload = {
+                const data = {
                     wsTitle: this.workspaceTitle,
-                    pages: selectedPages
+                    pages: this.pages.filter(p => ids.includes(p.id))
                 };
-                const url = window.location.origin + window.location.pathname + '#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-                navigator.clipboard.writeText(url).then(() => this.showToast("タイトルと選択ページを共有リンクにしました"));
+                const url = window.location.origin + window.location.pathname + '#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+                navigator.clipboard.writeText(url).then(() => this.showToast("共有リンクをコピーしました"));
             }
         };
 
