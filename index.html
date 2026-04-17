@@ -46,13 +46,8 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
+            font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color);
+            display: flex; height: 100vh; height: 100dvh; overflow: hidden;
             transition: background-color var(--transition-speed), color var(--transition-speed);
             font-size: clamp(16px, 1vw + 12px, 18px);
         }
@@ -75,67 +70,55 @@
         
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
-        .sidebar-header {
-            padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
+        .sidebar-header { padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .page-list { flex-grow: 1; overflow-y: auto; list-style: none; }
-        .page-item {
-            padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; gap: 10px; transition: background 0.2s;
-        }
+        .page-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { border-left: 4px solid var(--accent-color); background-color: var(--btn-hover); font-weight: 600; }
-        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; }
+        .share-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color); }
 
-        .sidebar-footer { 
-            padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); 
-            border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; 
-        }
+        .sidebar-footer { padding: 15px 15px calc(15px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
 
-        #topbar {
-            height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0;
-        }
+        #topbar { height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
         
-        .icon-btn {
-            background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color);
-            padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600;
-        }
+        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600; }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         .icon-btn.edit-active { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
-        #current-page-title {
-            flex-grow: 1; font-size: 1.2em; font-weight: 600; border: none;
-            background: transparent; color: inherit; outline: none; min-width: 0; padding: 5px;
-        }
+        #current-page-title { flex-grow: 1; font-size: 1.2em; font-weight: 600; border: none; background: transparent; color: inherit; outline: none; min-width: 0; padding: 5px; }
 
-        #content-wrapper { 
-            flex-grow: 1; padding: 40px 30px calc(60px + env(safe-area-inset-bottom)); 
-            overflow-y: auto; -webkit-overflow-scrolling: touch; 
-        }
+        #content-wrapper { flex-grow: 1; padding: 40px 30px calc(60px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
         #view-area { line-height: 1.8; max-width: 800px; margin: 0 auto; word-break: break-word; }
-        #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1em 0 0.5em; }
         
-        #edit-area {
-            display: none; width: 100%; height: 100%; min-height: 70vh;
-            background: transparent; color: inherit; border: none; outline: none;
-            font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6;
-        }
+        /* 見出しスタイル */
+        #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1.5em 0 0.8em; }
+        #view-area h2 { font-size: 1.5em; margin: 1.2em 0 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; }
+        #view-area h3 { font-size: 1.25em; margin: 1em 0 0.5em; }
 
-        .toast {
-            position: fixed; left: 50%; transform: translateX(-50%);
-            bottom: calc(30px + env(safe-area-inset-bottom));
-            background: var(--text-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px;
-            opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none;
-        }
+        /* 目次スタイル */
+        .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 20px; margin: 20px 0; border-radius: 8px; display: inline-block; min-width: 250px; max-width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .toc-title { font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .toc-list { list-style: none; font-size: 0.9em; }
+        .toc-item { margin: 8px 0; }
+        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; transition: opacity 0.2s; }
+        .toc-link:hover { opacity: 0.7; }
+
+        /* Wikidot系スタイル */
+        #view-area blockquote { border-left: 4px solid var(--quote-border); padding-left: 15px; margin: 1em 0; color: #666; background: var(--quote-bg); padding: 10px 15px; border-radius: 0 6px 6px 0; }
+        .wiki-collapsible { margin: 1em 0; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: var(--code-bg); }
+        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; user-select: none; }
+        .wiki-collapsible summary:hover { text-decoration: underline; }
+        .collapsible-content { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+
+        #edit-area { display: none; width: 100%; height: 100%; min-height: 70vh; background: transparent; color: inherit; border: none; outline: none; font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(30px + env(safe-area-inset-bottom)); background: var(--text-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none; }
 
         @media (max-width: 768px) {
             #sidebar { position: absolute; height: 100%; }
             #sidebar:not(.collapsed) { width: 280px; transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
             .btn-text { display: none; }
+            #content-wrapper { padding: 20px 15px calc(40px + env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
@@ -184,11 +167,7 @@
             init() {
                 this.cacheDOM();
                 this.initTheme();
-                
-                // 初回ロード時のルーティング
                 this.handleRouting(true);
-                
-                // ブラウザ操作時のルーティング
                 window.addEventListener('hashchange', () => this.handleRouting(false));
             },
 
@@ -223,7 +202,6 @@
             handleRouting(isInitial) {
                 const hash = window.location.hash;
 
-                // 1. 共有モード判定
                 if (hash.startsWith('#share=')) {
                     this.isSharedMode = true;
                     const raw = hash.replace('#share=', '');
@@ -234,14 +212,11 @@
                     return;
                 }
 
-                // 2. 共有モード継続判定（サイドバークリック等で #page= になった場合）
                 if (this.isSharedMode && hash.startsWith('#page=')) {
-                    const pageId = hash.replace('#page=', '');
-                    this.switchPage(pageId, false);
+                    this.switchPage(hash.replace('#page=', ''), false);
                     return;
                 }
 
-                // 3. 通常モード
                 this.isSharedMode = false;
                 this.dom.sidebarActions.style.display = 'flex';
                 this.dom.editBtn.style.display = 'flex';
@@ -250,7 +225,7 @@
                 this.loadLocalData();
 
                 if (this.pages.length === 0) {
-                    this.addPage("Welcome", "+ 使い方\n左上のメニューからページを作成・管理できます。\n\n+ 共有機能\nサイドバーのチェック項目を選んで共有リンクを作成できます。");
+                    this.createDefaultResourcePage();
                 } else if (hash.startsWith('#page=')) {
                     this.switchPage(hash.replace('#page=', ''), false);
                 } else if (isInitial || !this.currentPageId) {
@@ -258,17 +233,50 @@
                 }
             },
 
+            // 初回起動時のスタイルリソース（Wikidot構文集）を作成
+            createDefaultResourcePage() {
+                const resourceContent = `[[toc]]
+
++ テキスト装飾
+**太字 (Bold)**
+//斜体 (Italic)//
+__下線 (Underline)__
+--取り消し線 (Strikethrough)--
+
++ 見出しと目次
+文頭に \`+\` を置くことで見出しになります。
+\`[[toc]]\` と記述すると、ページ内の見出しから自動的に目次が生成されます。
+
+++ 見出し2 (H2)
++++ 見出し3 (H3)
+
++ カスタムブロック (Div)
+[[div style="border: 2px solid var(--accent-color); padding: 15px; border-radius: 8px;"]]
+\`[[div]]\` 〜 \`[[/div]]\` を使用して、HTMLのdivタグを生成できます。
+直接スタイルやクラスを当て込む際に便利です。
+[[/div]]
+
++ 引用 (Blockquote)
+> 行頭に \`>\` を置くことで引用ブロックになります。
+> 複数行にわたって記述できます。
+
++ 折りたたみ (Collapsible)
+[[collapsible show="+ 詳細を開く" hide="- 閉じる"]]
+\`[[collapsible]]\` と \`[[/collapsible]]\` で囲んだ部分は折りたたまれます。
+長文のログや、補足情報を隠しておくのに適しています。
+[[/collapsible]]`;
+
+                this.addPage("スタイルリソース", resourceContent);
+            },
+
             loadSharedData(encoded) {
                 try {
                     const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
                     this.pages = Array.isArray(decoded) ? decoded : [decoded];
                     this.isSharedMode = true;
-                    
-                    // 共有モードUI調整
                     this.dom.sidebarActions.style.display = 'none';
                     this.dom.editBtn.style.display = 'none';
                     this.dom.titleInput.readOnly = true;
-
                     this.renderSidebar();
                     this.switchPage(this.pages[0].id, false);
                     this.showToast("共有ビューを表示中");
@@ -303,10 +311,8 @@
                     span.className = 'page-title-text';
                     span.textContent = page.title || "無題";
                     li.onclick = () => {
-                        const prefix = this.isSharedMode ? '#page=' : '#page=';
-                        // 共有モードを維持したままページだけ切り替えるためにプログラムから switchPage を呼ぶ
                         this.switchPage(page.id, true);
-                        this.closeSidebar();
+                        if(window.innerWidth <= 768) this.closeSidebar();
                     };
 
                     li.appendChild(span);
@@ -326,18 +332,63 @@
                 this.dom.viewArea.innerHTML = this.parseFTML(page.content);
                 
                 this.renderSidebar();
-                if (updateHash) {
-                    // 共有モードの場合はハッシュを上書きしない（共有データをURLに保持し続けるため）
-                    if (!this.isSharedMode) window.location.hash = '#page=' + id;
+                if (updateHash && !this.isSharedMode) {
+                    window.location.hash = '#page=' + id;
                 }
             },
 
-            // --- 以降、描画・ユーティリティロジック (変更なし) ---
+            // 大幅に強化したWikidot構文パーサー
             parseFTML(text) {
                 if (!text) return '';
-                let html = text.replace(/^(\++) (.*?)$/gm, (m, l, t) => `<h${l.length}>${t}</h${l.length}>`);
+                let html = text;
+                const headings = [];
+
+                // 1. カスタムDiv
+                html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
+                html = html.replace(/\[\[\/div\]\]/gi, '</div>');
+
+                // 2. 折りたたみ (Collapsible)
+                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (match, show, hide) => {
+                    const summaryText = show || '+ 開く';
+                    return `<details class="wiki-collapsible"><summary>${summaryText}</summary><div class="collapsible-content">`;
+                });
+                html = html.replace(/\[\[\/collapsible\]\]/gi, '</div></details>');
+
+                // 3. 見出し (Headings) & TOC用データ収集
+                html = html.replace(/^(\+{1,6})\s+(.*?)$/gm, (match, levelStr, title) => {
+                    const level = levelStr.length;
+                    const id = "h-" + Math.random().toString(36).substr(2, 9);
+                    headings.push({ level, title, id });
+                    return `<h${level} id="${id}">${title}</h${level}>`;
+                });
+
+                // 4. インライン装飾
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
+                html = html.replace(/__(.*?)__/g, '<u>$1</u>');
+                html = html.replace(/--(.*?)--/g, '<del>$1</del>');
+
+                // 5. 引用 (Blockquote)
+                html = html.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
+
+                // 6. 改行処理
                 html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
+                // 見出しやDiv周りの不要な改行を軽くクリーニング
+                html = html.replace(/<br><h/g, '<h');
+                html = html.replace(/<\/h(\d)><br>/g, '</h$1>');
+
+                // 7. TOC (目次) の生成と挿入
+                // リンククリック時にURLハッシュを変更せず、JavaScriptでスクロールさせることで共有URL等との競合を防ぎます
+                if (html.includes('[[toc]]')) {
+                    let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
+                    headings.forEach(h => {
+                        const indent = (h.level - 1) * 16;
+                        tocHtml += `<li class="toc-item" style="margin-left:${indent}px"><span class="toc-link" onclick="document.getElementById('${h.id}').scrollIntoView()">${h.title}</span></li>`;
+                    });
+                    tocHtml += '</ul></div>';
+                    html = html.replace('[[toc]]', tocHtml);
+                }
+
                 return html;
             },
 
