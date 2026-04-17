@@ -9,13 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* 基本カラー */
+            /* 共通変数 */
             --accent-color: #0078d4;
             --edit-accent: #107c10;
             --font-main: 'M PLUS 1', sans-serif;
             --transition-speed: 0.3s;
-            
-            /* ライトテーマ */
+        }
+
+        /* デフォルト (ライトテーマ) */
+        body, body.light-theme {
             --bg-color: #fdfdfd;
             --text-color: #24292f;
             --sidebar-bg: #f6f8fa;
@@ -29,21 +31,19 @@
             --toc-bg: #ffffff;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                /* ダークテーマ */
-                --bg-color: #0d1117;
-                --text-color: #c9d1d9;
-                --sidebar-bg: #161b22;
-                --topbar-bg: #161b22;
-                --border-color: #30363d;
-                --btn-bg: #21262d;
-                --btn-hover: #30363d;
-                --code-bg: #161b22;
-                --quote-bg: #0d1117;
-                --quote-border: #8b949e;
-                --toc-bg: #161b22;
-            }
+        /* ダークテーマ (OS設定依存を廃止し、クラスで明示的に管理) */
+        body.dark-theme {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --sidebar-bg: #161b22;
+            --topbar-bg: #161b22;
+            --border-color: #30363d;
+            --btn-bg: #21262d;
+            --btn-hover: #30363d;
+            --code-bg: #161b22;
+            --quote-bg: #0d1117;
+            --quote-border: #8b949e;
+            --toc-bg: #161b22;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,8 +55,7 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
-            transition: background-color var(--transition-speed);
-            /* clamp()を使用したアクセシビリティ対応のフォントサイズ */
+            transition: background-color var(--transition-speed), color var(--transition-speed);
             font-size: clamp(16px, 1vw + 12px, 18px);
         }
 
@@ -114,7 +113,6 @@
             transition: box-shadow var(--transition-speed);
         }
 
-        /* ヘッダー要素の垂直中央揃え */
         .sidebar-header {
             padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
@@ -143,7 +141,7 @@
             background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color);
             padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit;
             display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600; white-space: nowrap;
-            transition: background 0.2s, border-color 0.2s;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
         }
         .icon-btn:hover { background: var(--btn-hover); }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
@@ -166,9 +164,7 @@
         #content-wrapper { flex-grow: 1; padding: 40px 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         #view-area { line-height: 1.8; max-width: 800px; margin: 0 auto; word-break: break-word; }
         
-        #view-area h1, #view-area h2, #view-area h3 {
-            margin-top: 1.5em; margin-bottom: 0.8em; line-height: 1.3;
-        }
+        #view-area h1, #view-area h2, #view-area h3 { margin-top: 1.5em; margin-bottom: 0.8em; line-height: 1.3; }
         #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; }
         
         /* 目次 */
@@ -183,7 +179,6 @@
         #view-area pre { overflow-x: auto; background: var(--code-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; font-size: 0.9em; margin: 1em 0; }
         #view-area blockquote { border-left: 4px solid var(--quote-border); padding-left: 15px; margin: 1em 0; color: #666; background: var(--quote-bg); padding: 10px 15px; border-radius: 0 6px 6px 0; }
 
-        /* 編集エリア */
         #edit-area {
             display: none; width: 100%; height: 100%; min-height: 70vh;
             background: transparent; color: inherit; border: none; outline: none;
@@ -200,16 +195,14 @@
         /* 📱 モバイル対応 */
         @media (max-width: 768px) {
             #sidebar { position: absolute; }
-            #sidebar:not(.collapsed) {
-                width: 280px; transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,0.1);
-            }
+            #sidebar:not(.collapsed) { width: 280px; transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
             #content-wrapper { padding: 20px 15px; }
             #topbar { padding: 0 15px; gap: 8px; height: 56px; }
             .icon-btn { padding: 8px; }
             .btn-text { display: none; }
-            #edit-area, #current-page-title { font-size: 16px; } /* iOSズーム防止 */
+            #edit-area, #current-page-title { font-size: 16px; }
             body.is-editing #main-container { box-shadow: inset 0 0 0 3px var(--edit-accent); }
-            #edit-status-badge { display: none !important; } /* モバイルでは枠線とボタン色で判断させるため非表示 */
+            #edit-status-badge { display: none !important; }
         }
     </style>
 </head>
@@ -263,16 +256,11 @@
 
             init() {
                 this.cacheDOM();
-                if (window.location.hash.startsWith('#share=')) {
-                    this.initSharedMode();
-                } else {
-                    this.loadData();
-                    if (this.pages.length === 0) {
-                        this.addPage("Welcome", "プライバシーに配慮したパーソナルワークスペースです。\n\n[[toc]]\n\n+ 特徴\n左上のメニューからサイドバーを開閉できます。デフォルトで閉じているため、モバイル端末でもコンテンツ領域を広く確保できます。\n\n++ 編集モードの明確化\n右上の「編集」ボタンを押すと、画面全体の枠線が緑色に変化し、現在が編集状態であることが視覚的に明確になります。\n\n++ プライバシー共有\nサイドバーからページにチェックを入れて「共有」を押すと、**サーバーを介さずに**ブラウザのURLフラグメントだけでデータを共有できるリンクが生成されます。");
-                    } else {
-                        this.switchPage(this.pages[0].id);
-                    }
-                }
+                this.initTheme();
+
+                // ブラウザの戻る・進むボタン（History API）に対応するためのイベントリスナー
+                window.addEventListener('hashchange', () => this.handleRouting());
+                this.handleRouting();
             },
 
             cacheDOM() {
@@ -290,16 +278,52 @@
                 };
             },
 
+            initTheme() {
+                // 保存されたテーマ、もしくはOSの設定を読み込む
+                const savedTheme = localStorage.getItem('personal_workspace_theme');
+                if (savedTheme === 'dark') {
+                    this.dom.body.classList.add('dark-theme');
+                    this.dom.body.classList.remove('light-theme');
+                } else if (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    this.dom.body.classList.add('dark-theme');
+                    this.dom.body.classList.remove('light-theme');
+                }
+            },
+
+            toggleTheme() {
+                const isDark = this.dom.body.classList.toggle('dark-theme');
+                this.dom.body.classList.toggle('light-theme', !isDark);
+                // 選択したテーマをブラウザに保存
+                localStorage.setItem('personal_workspace_theme', isDark ? 'dark' : 'light');
+            },
+
+            handleRouting() {
+                const hash = window.location.hash;
+                if (hash.startsWith('#share=')) {
+                    this.initSharedMode();
+                } else {
+                    this.loadData();
+                    if (this.pages.length === 0) {
+                        this.addPage("Welcome", "プライバシーに配慮したパーソナルワークスペースです。\n\n[[toc]]\n\n+ 特徴\n左上のメニューからサイドバーを開閉できます。デフォルトで閉じているため、モバイル端末でもコンテンツ領域を広く確保できます。\n\n++ テーマ切り替え\n右上の「🌓」ボタンでダーク/ライトの切り替えが可能になり、設定がブラウザに保存されるようになりました。\n\n++ ブラウザ対応\nブラウザの「戻る」「進む」ボタンでページ間をシームレスに移動できるようになりました。");
+                    } else if (hash.startsWith('#page=')) {
+                        const pageId = hash.replace('#page=', '');
+                        if (this.currentPageId !== pageId) {
+                            this.switchPage(pageId, false);
+                        }
+                    } else if (!this.currentPageId) {
+                        this.switchPage(this.pages[0].id, true);
+                    }
+                }
+            },
+
             parseFTML(text) {
                 if (!text) return '';
                 let html = text;
                 const headings = [];
 
-                // プレースホルダー処理
                 html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
                 html = html.replace(/\[\[\/div\]\]/gi, '</div>');
 
-                // 見出し抽出とID付与
                 html = html.replace(/^(\+{1,5}) (.*?)$/gm, (match, level, title) => {
                     const l = level.length;
                     const id = "h-" + Math.random().toString(36).substr(2, 9);
@@ -307,7 +331,6 @@
                     return `<h${l} id="${id}">${title}</h${l}>`;
                 });
 
-                // 目次生成
                 if (html.includes('[[toc]]')) {
                     let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
                     headings.forEach(h => {
@@ -318,14 +341,12 @@
                     html = html.replace('[[toc]]', tocHtml);
                 }
 
-                // 装飾
                 html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
                 html = html.replace(/__(.*?)__/g, '<u>$1</u>');
                 html = html.replace(/--(.*?)--/g, '<del>$1</del>');
 
-                // 改行を <br> に（ブロック要素の直後を除く簡易処理）
                 html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
                 html = html.replace(/<br><h/g, '<h');
                 html = html.replace(/<\/h(\d)><br>/g, '</h$1>');
@@ -336,14 +357,14 @@
             },
 
             loadData() {
-                const data = localStorage.getItem('personal_workspace_data_v4');
+                const data = localStorage.getItem('personal_workspace_data_v5');
                 this.pages = data ? JSON.parse(data) : [];
                 this.renderSidebar();
             },
 
             saveData() {
                 if(this.isSharedMode) return;
-                localStorage.setItem('personal_workspace_data_v4', JSON.stringify(this.pages));
+                localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
                 this.renderSidebar();
             },
 
@@ -363,7 +384,7 @@
                     titleSpan.className = 'page-title-text';
                     titleSpan.textContent = page.title;
                     titleSpan.onclick = () => {
-                        this.switchPage(page.id);
+                        this.switchPage(page.id, true);
                         this.closeSidebarIfMobile();
                     };
 
@@ -373,29 +394,35 @@
                 });
             },
 
-            switchPage(id) {
+            switchPage(id, updateHash = false) {
                 if (this.isEditing) this.saveCurrentContent();
                 const page = this.pages.find(p => p.id === id);
                 if (!page) return;
+                
                 this.currentPageId = id;
                 this.dom.titleInput.value = page.title;
                 this.dom.editArea.value = page.content;
                 this.dom.viewArea.innerHTML = this.parseFTML(page.content);
+                
                 if (this.isEditing) this.toggleEditMode(); // ページ切り替え時は閲覧モードに戻す
                 this.renderSidebar();
+
+                if (updateHash) {
+                    window.location.hash = '#page=' + id;
+                }
             },
 
             addPage(title = "無題のページ", content = "") {
                 const newId = 'p_' + Date.now();
                 this.pages.push({ id: newId, title: title, content: content });
                 this.saveData();
-                this.switchPage(newId);
+                this.switchPage(newId, true);
                 this.closeSidebarIfMobile();
             },
 
             updateTitle(val) {
                 const page = this.pages.find(p => p.id === this.currentPageId);
-                if (page) { page.title = val; this.saveData(); }
+                if (page) { page.title = val; this.saveData(); this.renderSidebar(); }
             },
 
             toggleEditMode() {
@@ -446,11 +473,6 @@
                 }
             },
 
-            toggleTheme() {
-                const isDark = document.body.classList.toggle('dark-theme');
-                document.body.classList.toggle('light-theme', !isDark);
-            },
-
             shareSelectedPages() {
                 const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked'))
                                          .map(cb => cb.dataset.id);
@@ -461,7 +483,6 @@
                 }
 
                 const sharedData = this.pages.filter(p => selectedIds.includes(p.id));
-                // データをURLフラグメント化（サーバー通信なし）
                 const payload = btoa(unescape(encodeURIComponent(JSON.stringify(sharedData))));
                 const url = window.location.origin + window.location.pathname + '#share=' + payload;
 
@@ -481,7 +502,7 @@
                     const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
                     this.pages = Array.isArray(decoded) ? decoded : [decoded];
                     this.renderSidebar();
-                    this.switchPage(this.pages[0].id);
+                    this.switchPage(this.pages[0].id, false);
                     this.showToast("共有モードで開きました（読み取り専用）");
                 } catch(e) {
                     this.dom.viewArea.innerHTML = "<p style='color:red;'>データの読み込みに失敗しました。URLが途切れていないか確認してください。</p>";
