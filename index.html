@@ -28,8 +28,8 @@
             --quote-bg: #f9fafb;
             --quote-border: #d0d7de;
             --toc-bg: #f8f9fa;
-            --content-bg: #fcfcfc; /* コンテンツエリアの背景色 */
-            --dot-color: #e1e4e8; /* ドットの色 */
+            --content-bg: #fcfcfc;
+            --dot-color: #e1e4e8;
         }
 
         body.dark-theme {
@@ -44,8 +44,8 @@
             --quote-bg: #161b22;
             --quote-border: #444c56;
             --toc-bg: #161b22;
-            --content-bg: #090c10; /* ダークモード時のコンテンツエリアの背景色 */
-            --dot-color: #30363d; /* ダークモード時のドットの色 */
+            --content-bg: #090c10;
+            --dot-color: #30363d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,19 +57,12 @@
             font-size: clamp(15px, 0.8vw + 12px, 18px);
         }
 
-        /* トップバーの編集状態スタイル（下線のみ残す） */
         body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); }
 
-        /* コンテンツエリア全体にドット背景を適用 */
         #content-wrapper {
-            flex-grow: 1;
-            padding: 40px 20px;
-            overflow-y: auto;
-            display: flex;
-            justify-content: center;
-            background-color: var(--content-bg); /* 背景色を適用 */
-            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); /* ドットパターンを適用 */
-            background-size: 20px 20px;
+            flex-grow: 1; padding: 40px 20px; overflow-y: auto; display: flex; justify-content: center;
+            background-color: var(--content-bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); background-size: 20px 20px;
         }
 
         #sidebar {
@@ -84,8 +77,7 @@
         .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
         #workspace-title-input { 
             background: transparent; border: 1px solid transparent; color: inherit; 
-            font-weight: 600; font-size: 1.2em; width: 100%; padding: 6px; border-radius: 6px;
-            transition: border-color 0.2s;
+            font-weight: 600; font-size: 1.2em; width: 100%; padding: 6px; border-radius: 6px; transition: border-color 0.2s;
         }
         #workspace-title-input:hover { border-color: var(--border-color); }
         #workspace-title-input:focus { background: var(--btn-bg); border-color: var(--accent-color); outline: none; }
@@ -104,23 +96,28 @@
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         .icon-btn.editing { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
-        #view-area, #edit-area {
-            width: 100%;
-            max-width: 850px;
-            line-height: 1.8;
-            /* 背景は#content-wrapperで管理するため、ここでは指定しない */
-            background: transparent;
-        }
+        #view-area, #edit-area { width: 100%; max-width: 850px; line-height: 1.8; background: transparent; }
+        #view-area img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; display: block; }
         
+        /* TOC Style */
         .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 0.9em; }
         .toc-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .toc-list { list-style: none; padding-left: 5px; }
-        .toc-item-1 { margin-top: 4px; }
-        .toc-item-2 { padding-left: 15px; opacity: 0.8; }
-        .toc-item-3 { padding-left: 30px; opacity: 0.7; font-size: 0.9em; }
+        .toc-item-1 { margin-top: 4px; } .toc-item-2 { padding-left: 15px; opacity: 0.8; } .toc-item-3 { padding-left: 30px; opacity: 0.7; font-size: 0.9em; }
         .toc-link { color: inherit; text-decoration: none; border-bottom: 1px dotted transparent; }
         .toc-link:hover { border-bottom-color: var(--accent-color); color: var(--accent-color); }
 
+        /* Quiz Style */
+        .quiz-container { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin: 25px 0; }
+        .quiz-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .quiz-btn { flex: 1; min-width: 140px; padding: 12px; border: 1px solid var(--border-color); background: var(--btn-bg); color: var(--text-color); border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1em; font-weight: 500; font-family: inherit; }
+        .quiz-btn:hover:not(:disabled) { background: var(--btn-hover); border-color: var(--accent-color); }
+        .quiz-btn.correct { background: #2ea043 !important; color: white !important; border-color: #2ea043 !important; }
+        .quiz-btn.incorrect { background: #da3633 !important; color: white !important; border-color: #da3633 !important; }
+        .quiz-btn:disabled { cursor: not-allowed; opacity: 0.8; }
+        .quiz-result { margin-top: 15px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
+
+        /* Typography */
         #view-area h1 { font-size: 2.2em; margin: 1.5em 0 0.8em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); }
         #view-area h2 { font-size: 1.6em; margin: 1.2em 0 0.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); }
         #view-area h3 { font-size: 1.3em; margin: 1em 0 0.5em; }
@@ -140,6 +137,8 @@
 
     <div id="sidebar-overlay" onclick="app.closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:80; backdrop-filter: blur(2px);"></div>
 
+    <input type="file" id="image-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event)">
+
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
             <input type="text" id="workspace-title-input" placeholder="Workspace Name" onchange="app.updateWorkspaceTitle(this.value)">
@@ -147,8 +146,7 @@
         <ul class="page-list" id="page-list"></ul>
         <div class="sidebar-footer">
             <button class="icon-btn" onclick="app.addPage()"><span>+</span> <span class="btn-text">新規ページ</span></button>
-            <button class="icon-btn primary" onclick="app.shareSelectedPages()"><span>🔗</span> <span class="btn-text">共有リンクを生成</span></button>
-            <button class="icon-btn" onclick="app.exportSelectedHTML()"><span>📄</span> <span class="btn-text">HTMLで保存</span></button>
+            <button class="icon-btn primary" onclick="app.exportSelectedHTML()"><span>📄</span> <span class="btn-text">HTMLで保存 (閲覧モード)</span></button>
         </div>
     </nav>
 
@@ -156,6 +154,7 @@
         <header id="topbar">
             <button class="icon-btn" onclick="app.openSidebar()">☰</button>
             <input type="text" id="current-page-title" style="flex:1; border:none; background:transparent; font-size:1.15em; font-weight:600; color:inherit; outline:none;" onchange="app.updateTitle(this.value)">
+            <button class="icon-btn" onclick="document.getElementById('image-upload').click()">🖼️ 画像添付</button>
             <button class="icon-btn" onclick="app.toggleEditMode()" id="edit-btn">✏️ 編集</button>
             <button class="icon-btn" onclick="window.print()">🖨️ PDF</button>
             <button class="icon-btn" onclick="app.exportToPNG()">🖼️ PNG</button>
@@ -170,6 +169,30 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // グローバルなクイズ判定関数（エクスポート先でも共通のロジックを使うため）
+        window.checkQuiz = function(btn, isCorrect) {
+            const container = btn.closest('.quiz-container');
+            const resultDiv = container.querySelector('.quiz-result');
+            const buttons = container.querySelectorAll('.quiz-btn');
+            
+            buttons.forEach(b => {
+                b.disabled = true;
+                if(b.dataset.correct === 'true') {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                resultDiv.innerHTML = '⭕ 正解！';
+                resultDiv.style.color = '#2ea043';
+            } else {
+                btn.classList.add('incorrect');
+                resultDiv.innerHTML = '❌ 不正解...';
+                resultDiv.style.color = '#da3633';
+            }
+            resultDiv.style.display = 'block';
+        };
+
         const app = {
             pages: [],
             workspaceTitle: "Workspace",
@@ -183,29 +206,21 @@
             },
 
             loadLocalData() {
-                const data = localStorage.getItem('personal_workspace_data_v6');
+                const data = localStorage.getItem('personal_workspace_data_v7');
                 this.pages = data ? JSON.parse(data) : [];
-                this.workspaceTitle = localStorage.getItem('personal_workspace_title_v6') || "Workspace";
+                this.workspaceTitle = localStorage.getItem('personal_workspace_title_v7') || "Workspace";
                 document.getElementById('workspace-title-input').value = this.workspaceTitle;
             },
 
             saveData() {
-                localStorage.setItem('personal_workspace_data_v6', JSON.stringify(this.pages));
-                localStorage.setItem('personal_workspace_title_v6', this.workspaceTitle);
+                localStorage.setItem('personal_workspace_data_v7', JSON.stringify(this.pages));
+                localStorage.setItem('personal_workspace_title_v7', this.workspaceTitle);
             },
 
-            async handleRouting() {
-                const hash = window.location.hash;
-                if (hash.startsWith('#s=')) {
-                    const decoded = await this.decompressData(hash.replace('#s=', ''));
-                    if (decoded) {
-                        this.pages = decoded.pages;
-                        this.workspaceTitle = decoded.wsTitle;
-                        document.getElementById('workspace-title-input').value = this.workspaceTitle;
-                    }
-                }
+            handleRouting() {
                 if (this.pages.length === 0) {
-                    this.addPage("Welcome", "[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 目次について\n`[[toc]]` と入力した場所に目次が生成されます。");
+                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 画像の添付\n上の「🖼️ 画像添付」ボタンから画像をアップロードすると、カーソル位置に画像が挿入されます。\n\n+ クイズの作成\n\`[[quiz:正解の選択肢|不正解の選択肢1|不正解の選択肢2]]\` のように記述すると、クイズが生成されます。（一番最初に書いたものが正解として扱われ、表示時にシャッフルされます）\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
+                    this.addPage("Welcome", welcomeText);
                 } else {
                     this.renderSidebar();
                     this.switchPage(this.currentPageId || this.pages[0].id);
@@ -249,13 +264,32 @@
                 const escaped = [];
                 const toc = [];
 
-                // 1. @@ エスケープ (構文無視)
+                // 1. @@ エスケープ
                 html = html.replace(/@@(.*?)@@/g, (m, p1) => {
                     escaped.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
                     return `__ESC_${escaped.length - 1}__`;
                 });
 
-                // 2. 見出しの事前スキャン（TOC用）
+                // 2. クイズのパース [[quiz:正解|不正解1|不正解2]]
+                html = html.replace(/\[\[quiz:(.*?)\]\]/g, (match, p1) => {
+                    let options = p1.split('|');
+                    if (options.length < 2) return match;
+                    // 先頭を正解とする配列を作成
+                    let optsArray = options.map((opt, index) => ({ text: opt.trim(), isCorrect: index === 0 }));
+                    // シャッフル
+                    optsArray.sort(() => Math.random() - 0.5);
+                    
+                    let buttonsHtml = optsArray.map(opt => 
+                        `<button class="quiz-btn" data-correct="${opt.isCorrect}" onclick="checkQuiz(this, ${opt.isCorrect})">${opt.text}</button>`
+                    ).join('');
+
+                    return `<div class="quiz-container"><div class="quiz-options">${buttonsHtml}</div><div class="quiz-result"></div></div>`;
+                });
+
+                // 3. 画像のパース ![alt](base64)
+                html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">');
+
+                // 4. 見出しの事前スキャン（TOC用）
                 const tempHtml = html.replace(/^(\+{1,3})\s+(.*?)$/gm, (m, l, t) => {
                     const level = l.length;
                     const id = 'heading-' + Math.random().toString(36).substr(2, 9);
@@ -263,7 +297,7 @@
                     return `<h${level} id="${id}">${t}</h${level}>`;
                 });
 
-                // 3. [[toc]] の置換
+                // 5. [[toc]] の置換
                 let tocHTML = '';
                 if (toc.length > 0) {
                     tocHTML = `<div class="toc-box"><div class="toc-title">📍 目次</div><ul class="toc-list">`;
@@ -272,22 +306,46 @@
                     });
                     tocHTML += `</ul></div>`;
                 }
-                
-                // 見出し置換済みのHTMLに対してTOCを流し込む
                 html = tempHtml.replace(/\[\[toc\]\]/gi, tocHTML);
 
-                // 4. その他のマークダウン風構文
+                // 6. その他の構文
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
                 html = html.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
                 html = html.replace(/\n/g, '<br>');
 
-                // 5. エスケープ戻し
+                // 7. エスケープ戻し
                 escaped.forEach((v, i) => {
                     html = html.replace(`__ESC_${i}__`, `<code>${v}</code>`);
                 });
 
                 return html;
+            },
+
+            // 画像アップロード処理
+            handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    const editArea = document.getElementById('edit-area');
+                    const start = editArea.selectionStart;
+                    const end = editArea.selectionEnd;
+                    const text = editArea.value;
+                    // 画像のマークダウン構文を挿入
+                    const insertText = `\n![画像](${base64})\n`;
+                    editArea.value = text.substring(0, start) + insertText + text.substring(end);
+                    
+                    // 保存とプレビュー更新
+                    const p = this.pages.find(x => x.id === this.currentPageId);
+                    if(p) p.content = editArea.value;
+                    this.saveData();
+                    if(!this.isEditing) this.renderContent(editArea.value);
+                    this.showToast("画像を挿入しました");
+                };
+                reader.readAsDataURL(file);
+                event.target.value = ''; // 同じ画像を再度選べるようにリセット
             },
 
             toggleEditMode() {
@@ -345,45 +403,141 @@
                 this.showToast("PNGを保存しました");
             },
 
+            // 閲覧モードとしてHTMLをエクスポートする
             exportSelectedHTML() {
                 const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(cb => cb.dataset.id);
                 if (selectedIds.length === 0) return this.showToast("ページを選択してください");
-                const selectedPages = this.pages.filter(p => selectedIds.includes(p.id));
-                let bodyContent = "";
-                selectedPages.forEach(p => {
-                    bodyContent += `<article style="margin-bottom:50px;"><h1>${p.title}</h1>${this.parseFTML(p.content)}</article><hr>`;
-                });
-                const template = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${this.workspaceTitle}</title><style>body{font-family:sans-serif;max-width:800px;margin:40px auto;line-height:1.7;padding:20px;}h1{border-bottom:2px solid #0078d4;padding-bottom:10px;}blockquote{background:#f4f4f4;padding:15px;border-left:5px solid #ccc;}.toc-box{background:#f8f9fa;border:1px solid #ddd;padding:15px;margin-bottom:20px;}.toc-list{list-style:none;padding:0;}.toc-item-2{padding-left:15px;}.toc-item-3{padding-left:30px;}</style></head><body>${bodyContent}</body></html>`;
+                
+                // 選択されたページをパース済みの状態で配列化
+                const exportData = this.pages.filter(p => selectedIds.includes(p.id)).map(p => ({
+                    title: p.title,
+                    html: this.parseFTML(p.content)
+                }));
+
+                const pagesJson = JSON.stringify(exportData);
+
+                // エクスポート用ビューアのテンプレート
+                const template = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${this.workspaceTitle} - Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent-color: #0078d4; --bg-color: #f6f8fa; --text-color: #1a1f23; --sidebar-bg: #ffffff; --border-color: #e1e4e8; --toc-bg: #f8f9fa; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'M PLUS 1', sans-serif; display: flex; height: 100vh; background: var(--bg-color); color: var(--text-color); font-size: 16px; }
+        
+        #sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; font-weight: 600; font-size: 1.2em; border-bottom: 1px solid var(--border-color); background: var(--sidebar-bg); }
+        .page-list { padding: 10px 0; }
+        .page-item { padding: 12px 20px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .page-item:hover { background: #f1f3f5; }
+        .page-item.active { border-left-color: var(--accent-color); font-weight: 600; background: #f1f3f5; color: var(--accent-color); }
+        
+        #content { flex-grow: 1; padding: 40px 20px; overflow-y: auto; background-image: radial-gradient(#d0d7de 1px, transparent 1px); background-size: 20px 20px; display: flex; justify-content: center; align-items: flex-start; }
+        .viewer-container { width: 100%; max-width: 850px; background: #ffffff; padding: 50px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 1px solid var(--border-color); line-height: 1.8; min-height: calc(100vh - 80px); }
+        
+        img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; display: block; }
+        h1 { font-size: 2.2em; margin: 0 0 0.8em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); }
+        h2 { font-size: 1.6em; margin: 1.2em 0 0.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); }
+        h3 { font-size: 1.3em; margin: 1em 0 0.5em; }
+        blockquote { border-left: 4px solid #d0d7de; background: #f9fafb; padding: 15px 20px; margin: 20px 0; font-style: italic; }
+        code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        
+        .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; }
+        .toc-title { font-weight: 600; margin-bottom: 8px; }
+        .toc-list { list-style: none; padding-left: 5px; } .toc-item-2 { padding-left: 15px; } .toc-item-3 { padding-left: 30px; }
+        .toc-link { color: inherit; text-decoration: none; } .toc-link:hover { color: var(--accent-color); }
+        
+        /* Quiz CSS */
+        .quiz-container { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin: 25px 0; }
+        .quiz-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .quiz-btn { flex: 1; min-width: 140px; padding: 12px; border: 1px solid var(--border-color); background: #fff; color: var(--text-color); border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1em; font-weight: 500; font-family: inherit; }
+        .quiz-btn:hover:not(:disabled) { border-color: var(--accent-color); background: #f1f3f5; }
+        .quiz-btn.correct { background: #2ea043 !important; color: white !important; border-color: #2ea043 !important; }
+        .quiz-btn.incorrect { background: #da3633 !important; color: white !important; border-color: #da3633 !important; }
+        .quiz-btn:disabled { cursor: not-allowed; opacity: 0.8; }
+        .quiz-result { margin-top: 15px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: auto; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border-color); }
+            #content { padding: 20px; }
+            .viewer-container { padding: 30px 20px; min-height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="sidebar-header">${this.workspaceTitle}</div>
+        <div class="page-list" id="export-page-list"></div>
+    </div>
+    <div id="content">
+        <div class="viewer-container" id="viewer"></div>
+    </div>
+
+    <script>
+        const pages = ${pagesJson};
+        
+        function renderSidebar() {
+            const sidebarList = document.getElementById('export-page-list');
+            pages.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'page-item';
+                div.textContent = p.title || '無題';
+                div.onclick = () => loadPage(index, div);
+                sidebarList.appendChild(div);
+            });
+            if(pages.length > 0) loadPage(0, sidebarList.firstChild);
+        }
+
+        function loadPage(index, el) {
+            document.querySelectorAll('.page-item').forEach(item => item.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            const viewer = document.getElementById('viewer');
+            const page = pages[index];
+            viewer.innerHTML = '<h1>' + (page.title || '無題') + '</h1>' + page.html;
+            
+            // モバイル時、ページ遷移したら一番上へスクロール
+            document.getElementById('content').scrollTop = 0;
+        }
+
+        function checkQuiz(btn, isCorrect) {
+            const container = btn.closest('.quiz-container');
+            const resultDiv = container.querySelector('.quiz-result');
+            const buttons = container.querySelectorAll('.quiz-btn');
+            
+            buttons.forEach(b => {
+                b.disabled = true;
+                if(b.dataset.correct === 'true') {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                resultDiv.innerHTML = '⭕ 正解！';
+                resultDiv.style.color = '#2ea043';
+            } else {
+                btn.classList.add('incorrect');
+                resultDiv.innerHTML = '❌ 不正解...';
+                resultDiv.style.color = '#da3633';
+            }
+            resultDiv.style.display = 'block';
+        }
+
+        renderSidebar();
+    <\/script>
+</body>
+</html>`;
+
                 const blob = new Blob([template], {type: 'text/html'});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `export_${this.workspaceTitle}.html`;
+                a.download = `Viewer_${this.workspaceTitle}.html`;
                 a.click();
-            },
-
-            async shareSelectedPages() {
-                const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(cb => cb.dataset.id);
-                if (ids.length === 0) return this.showToast("ページを選択してください");
-                const data = { wsTitle: this.workspaceTitle, pages: this.pages.filter(p => ids.includes(p.id)) };
-                const s = await this.compressData(data);
-                const url = window.location.origin + window.location.pathname + '#s=' + s;
-                await navigator.clipboard.writeText(url);
-                this.showToast("共有リンクをコピーしました");
-            },
-
-            async compressData(obj) {
-                const stream = new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream('deflate'));
-                const buffer = await new Response(stream).arrayBuffer();
-                return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-            },
-
-            async decompressData(b64) {
-                try {
-                    const bin = atob(b64.replace(/-/g, '+').replace(/_/g, '/'));
-                    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-                    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
-                    return JSON.parse(await new Response(stream).text());
-                } catch(e) { return null; }
             },
 
             openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; },
