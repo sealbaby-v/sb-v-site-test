@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --accent-color: #0078d4;
@@ -52,37 +53,32 @@
             font-size: clamp(16px, 1vw + 12px, 18px);
         }
 
-        body.is-editing #main-container { box-shadow: inset 0 0 0 4px var(--edit-accent); }
-        body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); }
-
-        #sidebar-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); z-index: 5; opacity: 0; transition: opacity var(--transition-speed);
+        /* 印刷・保存時の最適化 */
+        @media print {
+            #sidebar, #topbar, .toast, #sidebar-overlay { display: none !important; }
+            body, #main-container, #content-wrapper { display: block; height: auto; overflow: visible; background: white; }
+            #content-wrapper { padding: 0; }
+            #view-area { max-width: 100%; }
+            .page-break { page-break-after: always; }
         }
-        #sidebar-overlay.active { display: block; opacity: 1; }
 
+        body.is-editing #main-container { box-shadow: inset 0 0 0 4px var(--edit-accent); }
+        
         #sidebar {
             width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; transition: transform var(--transition-speed), width var(--transition-speed);
+            display: flex; flex-direction: column; transition: transform var(--transition-speed);
             flex-shrink: 0; z-index: 10; height: 100%;
         }
-        #sidebar.collapsed { width: 0; transform: translateX(-280px); border-right: none; }
+        #sidebar.collapsed { width: 0; transform: translateX(-280px); }
         
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
-        .sidebar-header { 
-            padding: 15px 20px; border-bottom: 1px solid var(--border-color); 
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        #workspace-title-input {
-            background: transparent; border: 1px solid transparent; color: inherit;
-            font-weight: 600; font-size: 1.1em; width: 100%; padding: 4px; border-radius: 4px;
-        }
-        #workspace-title-input:hover:not([readonly]) { border-color: var(--border-color); }
+        .sidebar-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        #workspace-title-input { background: transparent; border: 1px solid transparent; color: inherit; font-weight: 600; font-size: 1.1em; width: 100%; padding: 4px; border-radius: 4px; }
         #workspace-title-input:focus { background: var(--btn-bg); border-color: var(--accent-color); outline: none; }
 
         .page-list { flex-grow: 1; overflow-y: auto; list-style: none; }
-        .page-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+        .page-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { border-left: 4px solid var(--accent-color); background-color: var(--btn-hover); font-weight: 600; }
         .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95em; }
@@ -90,70 +86,51 @@
 
         .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
 
-        #topbar { height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
-        
-        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 600; }
+        #topbar { height: 64px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 12px; }
+        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-        .icon-btn.edit-active { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
-        #current-page-title { flex-grow: 1; font-size: 1.2em; font-weight: 600; border: none; background: transparent; color: inherit; outline: none; min-width: 0; padding: 5px; }
-
-        #content-wrapper { flex-grow: 1; padding: 40px 30px calc(60px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        #content-wrapper { flex-grow: 1; padding: 40px 30px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         #view-area { line-height: 1.8; max-width: 800px; margin: 0 auto; word-break: break-word; }
+        #view-area h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1.5em 0 0.8em; }
+        #view-area h2 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); margin: 1.2em 0 0.5em; }
         
-        #view-area h1 { font-size: 2.2em; border-bottom: 2px solid var(--border-color); padding-bottom: 0.2em; margin: 1.5em 0 0.8em; }
-        #view-area h2 { font-size: 1.6em; margin: 1.2em 0 0.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.2em; }
-        #view-area h3 { font-size: 1.3em; margin: 1em 0 0.5em; }
+        .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 15px; margin: 20px 0; border-radius: 8px; display: inline-block; min-width: 250px; }
+        #edit-area { display: none; width: 100%; height: 100%; background: transparent; color: inherit; border: none; outline: none; font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; }
 
-        .toc-container { background: var(--toc-bg); border: 1px solid var(--border-color); padding: 20px; margin: 20px 0; border-radius: 8px; display: inline-block; min-width: 250px; max-width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .toc-title { font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-        .toc-list { list-style: none; font-size: 0.9em; }
-        .toc-item { margin: 8px 0; }
-        .toc-link { color: var(--accent-color); text-decoration: underline; cursor: pointer; transition: opacity 0.2s; }
-
-        #view-area blockquote { border-left: 4px solid var(--quote-border); padding: 10px 15px; margin: 1em 0; background: var(--quote-bg); border-radius: 0 6px 6px 0; }
-        .wiki-collapsible { margin: 1em 0; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: var(--code-bg); }
-        .wiki-collapsible summary { cursor: pointer; font-weight: 600; color: var(--accent-color); outline: none; }
-        .collapsible-content { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
-
-        #edit-area { display: none; width: 100%; height: 100%; min-height: 70vh; background: transparent; color: inherit; border: none; outline: none; font-family: monospace; font-size: 1em; resize: none; max-width: 800px; margin: 0 auto; line-height: 1.6; }
-        .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(30px + env(safe-area-inset-bottom)); background: var(--text-color); color: var(--bg-color); padding: 12px 24px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; z-index: 100; pointer-events: none; }
+        .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30px; background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 100; }
 
         @media (max-width: 768px) {
             #sidebar { position: absolute; height: 100%; }
-            #sidebar:not(.collapsed) { width: 280px; transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,0.1); }
+            #sidebar.collapsed { width: 0; transform: translateX(-280px); }
+            #sidebar:not(.collapsed) { width: 280px; transform: translateX(0); box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
             .btn-text { display: none; }
         }
     </style>
 </head>
 <body class="light-theme">
 
-    <div id="sidebar-overlay" onclick="app.closeSidebar()"></div>
+    <div id="sidebar-overlay" onclick="app.closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:5;"></div>
 
     <nav id="sidebar" class="collapsed">
         <div class="sidebar-header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.75em; color: #666;">WORKSPACE TITLE</span>
-                <button class="icon-btn" onclick="app.closeSidebar()" style="padding: 4px 8px; border: none; background: transparent;">✕</button>
-            </div>
             <input type="text" id="workspace-title-input" value="Workspace" onchange="app.updateWorkspaceTitle(this.value)">
         </div>
         <ul class="page-list" id="page-list"></ul>
         <div class="sidebar-footer" id="sidebar-actions">
-            <button class="icon-btn" onclick="app.addPage()" style="justify-content: center;">+ 新規ページ</button>
-            <button class="icon-btn primary" onclick="app.shareSelectedPages()" style="justify-content: center;">🔗 選択項目を共有</button>
-            <button class="icon-btn" onclick="app.exportCurrentPage()" style="justify-content: center;">💾 HTMLとして保存</button>
+            <button class="icon-btn" onclick="app.addPage()">+ 新規ページ</button>
+            <button class="icon-btn primary" onclick="app.shareSelectedPages()">🔗 共有リンク</button>
+            <button class="icon-btn" onclick="app.exportSelectedHTML()">📄 選択分をHTML保存</button>
         </div>
     </nav>
 
     <div id="main-container">
         <header id="topbar">
             <button class="icon-btn" onclick="app.openSidebar()">☰</button>
-            <input type="text" id="current-page-title" placeholder="無題" onchange="app.updateTitle(this.value)">
-            <button class="icon-btn" onclick="app.toggleTheme()">🌓</button>
-            <button class="icon-btn" id="edit-toggle-btn" onclick="app.toggleEditMode()">
-                ✏️<span class="btn-text"> 編集</span>
-            </button>
+            <input type="text" id="current-page-title" style="flex:1; border:none; background:transparent; font-size:1.1em; font-weight:600;" onchange="app.updateTitle(this.value)">
+            <button class="icon-btn" onclick="app.toggleEditMode()" id="edit-btn">✏️ 編集</button>
+            <button class="icon-btn" onclick="window.print()">🖨️ PDF</button>
+            <button class="icon-btn" onclick="app.exportToPNG()">🖼️ PNG</button>
         </header>
         
         <div id="content-wrapper">
@@ -170,280 +147,184 @@
             workspaceTitle: "Workspace",
             currentPageId: null,
             isEditing: false,
-            isSharedMode: false,
 
             init() {
-                this.cacheDOM();
-                this.initTheme();
-                this.handleRouting(true);
-                window.addEventListener('hashchange', () => this.handleRouting(false));
-            },
-
-            cacheDOM() {
-                this.dom = {
-                    body: document.body,
-                    sidebar: document.getElementById('sidebar'),
-                    overlay: document.getElementById('sidebar-overlay'),
-                    pageList: document.getElementById('page-list'),
-                    titleInput: document.getElementById('current-page-title'),
-                    wsTitleInput: document.getElementById('workspace-title-input'),
-                    viewArea: document.getElementById('view-area'),
-                    editArea: document.getElementById('edit-area'),
-                    editBtn: document.getElementById('edit-toggle-btn'),
-                    toast: document.getElementById('toast'),
-                    sidebarActions: document.getElementById('sidebar-actions')
-                };
-            },
-
-            initTheme() {
-                const saved = localStorage.getItem('personal_workspace_theme');
-                if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    this.dom.body.classList.replace('light-theme', 'dark-theme');
-                }
-            },
-
-            toggleTheme() {
-                const isDark = this.dom.body.classList.toggle('dark-theme');
-                this.dom.body.classList.toggle('light-theme', !isDark);
-                localStorage.setItem('personal_workspace_theme', isDark ? 'dark' : 'light');
-            },
-
-            async handleRouting(isInitial) {
-                const hash = window.location.hash;
-
-                if (hash.startsWith('#s=')) {
-                    this.isSharedMode = true;
-                    const compressed = hash.replace('#s=', '');
-                    const decoded = await this.decompressData(compressed);
-                    if (decoded) this.applySharedData(decoded);
-                    return;
-                }
-
-                this.isSharedMode = false;
-                this.dom.sidebarActions.style.display = 'flex';
-                this.dom.editBtn.style.display = 'flex';
-                this.dom.titleInput.readOnly = false;
-                this.dom.wsTitleInput.readOnly = false;
                 this.loadLocalData();
-
-                if (this.pages.length === 0) {
-                    this.addPage("Welcome", "# Welcome to Your Workspace\n\nここからメモの作成を開始できます。");
-                } else if (hash.startsWith('#page=')) {
-                    this.switchPage(hash.replace('#page=', ''), false);
-                } else if (isInitial || !this.currentPageId) {
-                    this.switchPage(this.pages[0].id, true);
-                }
-            },
-
-            applySharedData(decoded) {
-                this.pages = decoded.pages || [];
-                this.workspaceTitle = decoded.wsTitle || "Shared Workspace";
-                this.dom.wsTitleInput.value = this.workspaceTitle;
-                this.dom.wsTitleInput.readOnly = true;
-                this.dom.sidebarActions.style.display = 'none';
-                this.dom.editBtn.style.display = 'none';
-                this.dom.titleInput.readOnly = true;
-                this.renderSidebar();
-                this.switchPage(this.pages[0].id, false);
-                this.showToast("共有ビューを表示中");
-            },
-
-            async compressData(obj) {
-                const stream = new Blob([JSON.stringify(obj)], {type: 'application/json'}).stream();
-                const compressedStream = stream.pipeThrough(new CompressionStream('deflate'));
-                const response = new Response(compressedStream);
-                const buffer = await response.arrayBuffer();
-                return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-            },
-
-            async decompressData(base64) {
-                try {
-                    const binary = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
-                    const bytes = new Uint8Array(binary.length);
-                    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                    const stream = new Blob([bytes]).stream();
-                    const decompressedStream = stream.pipeThrough(new DecompressionStream('deflate'));
-                    const response = new Response(decompressedStream);
-                    return JSON.parse(await response.text());
-                } catch (e) { return null; }
-            },
-
-            exportCurrentPage() {
-                const page = this.pages.find(p => p.id === this.currentPageId);
-                if (!page) return;
-                
-                const htmlContent = `
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>${page.title}</title>
-    <style>
-        body { font-family: 'M PLUS 1', sans-serif; line-height: 1.8; color: #24292f; max-width: 800px; margin: 40px auto; padding: 20px; background: #fdfdfd; }
-        h1 { font-size: 2.2em; border-bottom: 2px solid #d0d7de; padding-bottom: 0.2em; }
-        h2 { font-size: 1.6em; border-bottom: 1px solid #d0d7de; padding-bottom: 0.2em; margin-top: 1.5em; }
-        blockquote { border-left: 4px solid #9ca3af; padding: 10px 15px; margin: 1em 0; background: #f3f4f6; }
-        .toc-container { background: #fff; border: 1px solid #d0d7de; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .wiki-collapsible { border: 1px solid #d0d7de; border-radius: 6px; padding: 10px; background: #f6f8fa; margin: 1em 0; }
-    </style>
-</head>
-<body>
-    <h1>${page.title}</h1>
-    <div id="content">${this.parseFTML(page.content)}</div>
-</body>
-</html>`;
-                const blob = new Blob([htmlContent], {type: 'text/html'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${page.title || 'page'}.html`;
-                a.click();
-                URL.revokeObjectURL(url);
-                this.showToast("HTMLを保存しました");
+                this.handleRouting();
+                window.addEventListener('hashchange', () => this.handleRouting());
             },
 
             loadLocalData() {
                 const data = localStorage.getItem('personal_workspace_data_v5');
                 this.pages = data ? JSON.parse(data) : [];
                 this.workspaceTitle = localStorage.getItem('personal_workspace_title') || "Workspace";
-                this.dom.wsTitleInput.value = this.workspaceTitle;
+                document.getElementById('workspace-title-input').value = this.workspaceTitle;
+            },
+
+            saveData() {
+                localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
+                localStorage.setItem('personal_workspace_title', this.workspaceTitle);
+            },
+
+            async handleRouting() {
+                const hash = window.location.hash;
+                if (hash.startsWith('#s=')) {
+                    const decoded = await this.decompressData(hash.replace('#s=', ''));
+                    if (decoded) {
+                        this.pages = decoded.pages;
+                        this.workspaceTitle = decoded.wsTitle;
+                        document.getElementById('workspace-title-input').value = this.workspaceTitle;
+                    }
+                }
+                if (this.pages.length === 0) this.addPage("Welcome", "# 新規ワークスペース\nここから作成を開始してください。");
                 this.renderSidebar();
+                this.switchPage(this.pages[0].id);
             },
 
             renderSidebar() {
-                this.dom.pageList.innerHTML = '';
-                this.pages.forEach(page => {
+                const list = document.getElementById('page-list');
+                list.innerHTML = '';
+                this.pages.forEach(p => {
                     const li = document.createElement('li');
-                    li.className = `page-item ${page.id === this.currentPageId ? 'active' : ''}`;
-                    if (!this.isSharedMode) {
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.className = 'share-checkbox';
-                        cb.dataset.id = page.id;
-                        cb.onclick = e => e.stopPropagation();
-                        li.appendChild(cb);
-                    }
-                    const span = document.createElement('span');
-                    span.className = 'page-title-text';
-                    span.textContent = page.title || "無題";
-                    li.onclick = () => { this.switchPage(page.id, true); if(window.innerWidth <= 768) this.closeSidebar(); };
-                    li.appendChild(span);
-                    this.dom.pageList.appendChild(li);
+                    li.className = `page-item ${p.id === this.currentPageId ? 'active' : ''}`;
+                    li.innerHTML = `
+                        <input type="checkbox" class="share-checkbox" data-id="${p.id}" onclick="event.stopPropagation()">
+                        <span class="page-title-text">${p.title || '無題'}</span>
+                    `;
+                    li.onclick = () => this.switchPage(p.id);
+                    list.appendChild(li);
                 });
             },
 
-            switchPage(id, updateHash) {
+            switchPage(id) {
                 const page = this.pages.find(p => p.id === id);
                 if (!page) return;
-                if (this.isEditing) this.toggleEditMode();
                 this.currentPageId = id;
-                this.dom.titleInput.value = page.title;
-                this.dom.editArea.value = page.content;
-                this.dom.viewArea.innerHTML = this.parseFTML(page.content);
+                document.getElementById('current-page-title').value = page.title;
+                document.getElementById('edit-area').value = page.content;
+                document.getElementById('view-area').innerHTML = this.parseFTML(page.content);
                 this.renderSidebar();
-                if (updateHash && !this.isSharedMode) window.location.hash = '#page=' + id;
             },
 
             parseFTML(text) {
                 if (!text) return '';
                 let html = text;
-                const headings = [];
-                const escapedContent = [];
-
+                const escaped = [];
+                // @@ エスケープ
                 html = html.replace(/@@(.*?)@@/g, (m, p1) => {
-                    const placeholder = `__ESCAPED_${escapedContent.length}__`;
-                    escapedContent.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
-                    return placeholder;
+                    escaped.push(p1.replace(/</g, "&lt;"));
+                    return `__ESC_${escaped.length - 1}__`;
                 });
-
-                html = html.replace(/\[\[div(.*?)\]\]/gi, '<div$1>');
-                html = html.replace(/\[\[\/div\]\]/gi, '</div>');
-                html = html.replace(/\[\[collapsible(?:\s+show="([^"]+)")?(?:\s+hide="([^"]+)")?\]\]/gi, (m, s, h) => 
-                    `<details class="wiki-collapsible"><summary>${s || '+ 開く'}</summary><div class="collapsible-content">`);
-                html = html.replace(/\[\[\/collapsible\]\]/gi, '</div></details>');
-
-                html = html.replace(/^(\+{1,6})\s+(.*?)$/gm, (m, l, t) => {
-                    const level = l.length;
-                    const id = "h-" + Math.random().toString(36).substr(2, 5);
-                    headings.push({ level, title: t, id });
-                    return `<h${level} id="${id}">${t}</h${level}>`;
-                });
-
+                // 簡易構文
+                html = html.replace(/^(\+{1,3})\s+(.*?)$/gm, (m, l, t) => `<h${l.length}>${t}</h${l.length}>`);
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
-                html = html.replace(/__(.*?)__/g, '<u>$1</u>');
-                html = html.replace(/--(.*?)--/g, '<del>$1</del>');
                 html = html.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
-                html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
-
-                if (html.includes('[[toc]]')) {
-                    let tocHtml = '<div class="toc-container"><div class="toc-title">目次</div><ul class="toc-list">';
-                    headings.forEach(h => {
-                        tocHtml += `<li class="toc-item" style="margin-left:${(h.level-1)*16}px"><span class="toc-link" onclick="document.getElementById('${h.id}').scrollIntoView()">${h.title}</span></li>`;
-                    });
-                    html = html.replace('[[toc]]', tocHtml + '</ul></div>');
-                }
-
-                escapedContent.forEach((content, i) => {
-                    html = html.replace(`__ESCAPED_${i}__`, content);
-                });
-
+                html = html.replace(/\n/g, '<br>');
+                // エスケープ戻し
+                escaped.forEach((v, i) => html = html.replace(`__ESC_${i}__`, v));
                 return html;
             },
 
-            updateWorkspaceTitle(val) {
-                this.workspaceTitle = val;
-                if(!this.isSharedMode) localStorage.setItem('personal_workspace_title', val);
+            // 選択したページを1つのHTMLファイルとして出力
+            exportSelectedHTML() {
+                const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(cb => cb.dataset.id);
+                if (selectedIds.length === 0) return this.showToast("ページを選択してください");
+
+                const selectedPages = this.pages.filter(p => selectedIds.includes(p.id));
+                let combinedBody = "";
+                selectedPages.forEach(p => {
+                    combinedBody += `<section class="page-break"><h1>${p.title}</h1><div>${this.parseFTML(p.content)}</div></section><hr style="margin:40px 0; border:0; border-top:1px solid #eee;">`;
+                });
+
+                const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${this.workspaceTitle}</title>
+                <style>body{font-family:sans-serif; line-height:1.6; max-width:800px; margin:40px auto; padding:20px; color:#333;} h1{border-bottom:2px solid #eee; padding-bottom:10px;} blockquote{background:#f9f9f9; border-left:4px solid #ccc; padding:10px; margin:10px 0;} @media print{.page-break{page-break-after:always;}}</style>
+                </head><body>${combinedBody}</body></html>`;
+
+                const blob = new Blob([finalHTML], {type: 'text/html'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${this.workspaceTitle}_export.html`;
+                a.click();
+            },
+
+            // PNGとして保存
+            async exportToPNG() {
+                this.showToast("画像を生成中...");
+                const element = document.getElementById('view-area');
+                const canvas = await html2canvas(element, {
+                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-color'),
+                    scale: 2
+                });
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL("image/png");
+                a.download = `${document.getElementById('current-page-title').value || 'page'}.png`;
+                a.click();
+                this.showToast("PNGを保存しました");
+            },
+
+            async compressData(obj) {
+                const stream = new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream('deflate'));
+                const buffer = await new Response(stream).arrayBuffer();
+                return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            },
+
+            async decompressData(b64) {
+                try {
+                    const bin = atob(b64.replace(/-/g, '+').replace(/_/g, '/'));
+                    const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+                    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+                    return JSON.parse(await new Response(stream).text());
+                } catch(e) { return null; }
             },
 
             addPage(title = "新規ページ", content = "") {
-                const newId = 'p_' + Date.now();
-                this.pages.push({ id: newId, title, content });
+                const id = 'p' + Date.now();
+                this.pages.push({ id, title, content });
                 this.saveData();
-                this.switchPage(newId, true);
+                this.switchPage(id);
             },
 
-            updateTitle(val) {
-                const page = this.pages.find(p => p.id === this.currentPageId);
-                if (page) { page.title = val; this.saveData(); this.renderSidebar(); }
+            updateTitle(v) { 
+                const p = this.pages.find(x => x.id === this.currentPageId); 
+                if(p) { p.title = v; this.saveData(); this.renderSidebar(); }
             },
 
-            saveData() {
-                if(!this.isSharedMode) localStorage.setItem('personal_workspace_data_v5', JSON.stringify(this.pages));
-            },
+            updateWorkspaceTitle(v) { this.workspaceTitle = v; this.saveData(); },
 
             toggleEditMode() {
                 this.isEditing = !this.isEditing;
-                this.dom.body.classList.toggle('is-editing', this.isEditing);
+                const view = document.getElementById('view-area');
+                const edit = document.getElementById('edit-area');
+                const btn = document.getElementById('edit-btn');
                 if (this.isEditing) {
-                    this.dom.viewArea.style.display = 'none';
-                    this.dom.editArea.style.display = 'block';
-                    this.dom.editBtn.classList.add('edit-active');
-                    this.dom.editArea.focus();
+                    view.style.display = 'none';
+                    edit.style.display = 'block';
+                    btn.textContent = "✅ 完了";
+                    edit.focus();
                 } else {
-                    const page = this.pages.find(p => p.id === this.currentPageId);
-                    if (page) {
-                        page.content = this.dom.editArea.value;
-                        this.dom.viewArea.innerHTML = this.parseFTML(page.content);
-                        this.saveData();
-                    }
-                    this.dom.viewArea.style.display = 'block';
-                    this.dom.editArea.style.display = 'none';
-                    this.dom.editBtn.classList.remove('edit-active');
+                    const p = this.pages.find(x => x.id === this.currentPageId);
+                    if(p) p.content = edit.value;
+                    this.saveData();
+                    this.switchPage(this.currentPageId);
+                    view.style.display = 'block';
+                    edit.style.display = 'none';
+                    btn.textContent = "✏️ 編集";
                 }
             },
 
-            openSidebar() { this.dom.sidebar.classList.remove('collapsed'); this.dom.overlay.classList.add('active'); },
-            closeSidebar() { this.dom.sidebar.classList.add('collapsed'); this.dom.overlay.classList.remove('active'); },
-            showToast(m) { this.dom.toast.textContent = m; this.dom.toast.style.opacity = 1; setTimeout(() => this.dom.toast.style.opacity = 0, 2000); },
-
             async shareSelectedPages() {
-                const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(c => c.dataset.id);
+                const ids = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(cb => cb.dataset.id);
                 if (ids.length === 0) return this.showToast("ページを選択してください");
                 const data = { wsTitle: this.workspaceTitle, pages: this.pages.filter(p => ids.includes(p.id)) };
-                const compressed = await this.compressData(data);
-                navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#s=' + compressed).then(() => this.showToast("リンクをコピーしました"));
-            }
+                const s = await this.compressData(data);
+                navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#s=' + s);
+                this.showToast("共有リンクをコピーしました");
+            },
+
+            openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; },
+            closeSidebar() { document.getElementById('sidebar').classList.add('collapsed'); document.getElementById('sidebar-overlay').style.display = 'none'; },
+            showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
         };
 
         app.init();
