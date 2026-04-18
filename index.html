@@ -57,15 +57,20 @@
             font-size: clamp(15px, 0.8vw + 12px, 18px);
         }
 
-        /* 編集状態の視覚強調 */
         body.is-editing #topbar { border-bottom: 4px solid var(--edit-accent); }
 
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; height: 100%; }
 
         #content-wrapper {
-            flex-grow: 1; padding: 40px 20px 80px 20px; overflow-y: auto; display: flex; justify-content: center;
+            flex-grow: 1; 
+            padding: 40px 20px 30vh 20px; /* 下部に大きな余白を確保 */
+            overflow-y: auto; 
+            display: flex; 
+            justify-content: center;
             background-color: var(--content-bg);
-            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); background-size: 20px 20px;
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); 
+            background-size: 20px 20px;
+            scroll-behavior: smooth;
         }
 
         #sidebar {
@@ -90,17 +95,17 @@
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { background-color: var(--btn-hover); color: var(--accent-color); font-weight: 600; border-right: 4px solid var(--accent-color); }
         .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .share-checkbox { width: 16px; height: 16px; cursor: pointer; }
 
         .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
 
-        #topbar { height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 50; transition: border-bottom 0.2s; flex-shrink: 0; }
+        #topbar { height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 50; flex-shrink: 0; }
         .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 500; transition: 0.2s; white-space: nowrap; }
         .icon-btn:hover { background: var(--btn-hover); border-color: var(--accent-color); }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         .icon-btn.editing { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
         #view-area, #edit-area { width: 100%; max-width: 850px; line-height: 1.8; background: transparent; }
+        #view-area { margin-bottom: 50px; } /* コンテンツ自体の下部余白 */
         #view-area img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
         .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 0.9em; }
@@ -119,12 +124,10 @@
         .quiz-btn:disabled { cursor: not-allowed; opacity: 0.8; }
         .quiz-result { margin-top: 15px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
 
-        #view-area h1 { font-size: 2.2em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); margin: 1em 0 0.5em 0; }
-        #view-area h1:first-child { margin-top: 0; }
-        #view-area h2 { font-size: 1.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); margin: 1.5em 0 0.5em 0; }
-        #view-area h3 { font-size: 1.3em; margin: 1.2em 0 0.5em 0; }
+        #view-area h1 { font-size: 2.2em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); margin-top: 1em; }
+        #view-area h2 { font-size: 1.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); margin-top: 1.5em; }
         #view-area blockquote { border-left: 4px solid var(--quote-border); background: var(--quote-bg); padding: 15px 20px; margin: 20px 0; font-style: italic; }
-        #view-area code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        #view-area code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
 
         #edit-area { display: none; height: 100%; border: none; outline: none; font-family: 'Consolas', 'Monaco', monospace; font-size: 1.05em; resize: none; background: transparent; color: inherit; width: 100%; }
 
@@ -132,7 +135,6 @@
 
         @media (max-width: 768px) {
             .btn-text { display: none; }
-            #sidebar { width: 260px; }
         }
     </style>
 </head>
@@ -172,7 +174,6 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // Quiz logic
         window.checkQuiz = function(btn, isCorrect) {
             const container = btn.closest('.quiz-container');
             const resultDiv = container.querySelector('.quiz-result');
@@ -283,7 +284,6 @@
                 const escaped = [];
                 const toc = [];
 
-                // @@...@@ 構文の保護
                 html = html.replace(/@@(.*?)@@/g, (m, p1) => {
                     escaped.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
                     return `__ESC_${escaped.length - 1}__`;
@@ -377,9 +377,7 @@
                 this.showToast("画像を生成中...");
                 const canvas = await html2canvas(document.getElementById('view-area'), { 
                     backgroundColor: getComputedStyle(document.getElementById('content-wrapper')).backgroundColor, 
-                    scale: 2, 
-                    useCORS: true,
-                    logging: false
+                    scale: 2, useCORS: true, logging: false
                 });
                 const a = document.createElement('a'); a.href = canvas.toDataURL("image/png"); a.download = `${document.getElementById('current-page-title').value || 'page'}.png`; a.click();
                 this.showToast("PNGを保存しました");
