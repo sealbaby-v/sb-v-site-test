@@ -57,10 +57,13 @@
             font-size: clamp(15px, 0.8vw + 12px, 18px);
         }
 
-        body.is-editing #topbar { border-bottom: 3px solid var(--edit-accent); }
+        /* 編集状態の視覚強調 */
+        body.is-editing #topbar { border-bottom: 4px solid var(--edit-accent); }
+
+        #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; height: 100%; }
 
         #content-wrapper {
-            flex-grow: 1; padding: 40px 20px 200px 20px; overflow-y: auto; display: flex; justify-content: center;
+            flex-grow: 1; padding: 40px 20px 80px 20px; overflow-y: auto; display: flex; justify-content: center;
             background-color: var(--content-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); background-size: 20px 20px;
         }
@@ -74,8 +77,6 @@
         }
         #sidebar.open { transform: translateX(0); }
         
-        #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
-
         .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
         #workspace-title-input { 
             background: transparent; border: 1px solid transparent; color: inherit; 
@@ -89,10 +90,11 @@
         .page-item:hover { background-color: var(--btn-hover); }
         .page-item.active { background-color: var(--btn-hover); color: var(--accent-color); font-weight: 600; border-right: 4px solid var(--accent-color); }
         .page-title-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .share-checkbox { width: 16px; height: 16px; cursor: pointer; }
 
         .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
 
-        #topbar { height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 50; transition: background-color 0.3s; }
+        #topbar { height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 50; transition: border-bottom 0.2s; flex-shrink: 0; }
         .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 500; transition: 0.2s; white-space: nowrap; }
         .icon-btn:hover { background: var(--btn-hover); border-color: var(--accent-color); }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
@@ -117,18 +119,20 @@
         .quiz-btn:disabled { cursor: not-allowed; opacity: 0.8; }
         .quiz-result { margin-top: 15px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
 
-        #view-area h1 { font-size: 2.2em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); }
-        #view-area h2 { font-size: 1.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); }
-        #view-area h3 { font-size: 1.3em; }
+        #view-area h1 { font-size: 2.2em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); margin: 1em 0 0.5em 0; }
+        #view-area h1:first-child { margin-top: 0; }
+        #view-area h2 { font-size: 1.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); margin: 1.5em 0 0.5em 0; }
+        #view-area h3 { font-size: 1.3em; margin: 1.2em 0 0.5em 0; }
         #view-area blockquote { border-left: 4px solid var(--quote-border); background: var(--quote-bg); padding: 15px 20px; margin: 20px 0; font-style: italic; }
-        #view-area code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        #view-area code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
 
-        #edit-area { display: none; height: 100%; border: none; outline: none; font-family: 'Consolas', 'Monaco', monospace; font-size: 1.05em; resize: none; background: transparent; color: inherit; }
+        #edit-area { display: none; height: 100%; border: none; outline: none; font-family: 'Consolas', 'Monaco', monospace; font-size: 1.05em; resize: none; background: transparent; color: inherit; width: 100%; }
 
         .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30px; background: #24292f; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.9em; pointer-events: none; }
 
         @media (max-width: 768px) {
             .btn-text { display: none; }
+            #sidebar { width: 260px; }
         }
     </style>
 </head>
@@ -145,7 +149,7 @@
         <ul class="page-list" id="page-list"></ul>
         <div class="sidebar-footer">
             <button class="icon-btn" onclick="app.addPage()"><span>+</span> <span class="btn-text">新規ページ</span></button>
-            <button class="icon-btn primary" onclick="app.exportSelectedHTML()"><span>📄</span> <span class="btn-text">HTMLで保存 (閲覧モード)</span></button>
+            <button class="icon-btn primary" onclick="app.exportSelectedHTML()"><span>📄</span> <span class="btn-text">HTMLで保存 (閲覧用)</span></button>
         </div>
     </nav>
 
@@ -153,9 +157,8 @@
         <header id="topbar">
             <button class="icon-btn" onclick="app.openSidebar()">☰</button>
             <input type="text" id="current-page-title" style="flex:1; border:none; background:transparent; font-size:1.15em; font-weight:600; color:inherit; outline:none;" onchange="app.updateTitle(this.value)">
-            <button class="icon-btn" onclick="document.getElementById('image-upload').click()">🖼️ 画像選択</button>
+            <button class="icon-btn" onclick="document.getElementById('image-upload').click()">🖼️ 画像</button>
             <button class="icon-btn" onclick="app.toggleEditMode()" id="edit-btn">✏️ 編集</button>
-            <button class="icon-btn" onclick="window.print()">🖨️ PDF</button>
             <button class="icon-btn" onclick="app.exportToPNG()">🖼️ PNG</button>
             <button class="icon-btn" onclick="app.toggleTheme()">🌗</button>
         </header>
@@ -169,6 +172,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // Quiz logic
         window.checkQuiz = function(btn, isCorrect) {
             const container = btn.closest('.quiz-container');
             const resultDiv = container.querySelector('.quiz-result');
@@ -203,8 +207,6 @@
 
             setupImageListeners() {
                 const editArea = document.getElementById('edit-area');
-                
-                // 貼り付け (Ctrl+V)
                 editArea.addEventListener('paste', (e) => {
                     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
                     for (let item of items) {
@@ -214,8 +216,6 @@
                         }
                     }
                 });
-
-                // ドラッグ＆ドロップ
                 editArea.addEventListener('dragover', (e) => { e.preventDefault(); editArea.style.background = 'rgba(0,120,212,0.05)'; });
                 editArea.addEventListener('dragleave', () => { editArea.style.background = 'transparent'; });
                 editArea.addEventListener('drop', (e) => {
@@ -243,8 +243,7 @@
 
             handleRouting() {
                 if (this.pages.length === 0) {
-                    const welcomeText = `+ 画像の貼り付け\nエディタを編集モードにし、スクリーンショットを **Ctrl+V** で貼り付けたり、画像をドロップしたりできます。\n\n[[div style="border: 2px dashed #ccc; padding: 20px; text-align: center; color: #666;"]]ここに画像を貼ってみてください[[/div]]`;
-                    this.addPage("Welcome", welcomeText);
+                    this.addPage("Welcome", "+ 画像の貼り付け\nエディタを編集モードにし、画像を **Ctrl+V** で貼り付け可能です。\n\n[[div style=\"border: 2px dashed #ccc; padding: 20px; text-align: center; color: #666;\"]]ここに画像を貼ってみてください[[/div]]");
                 } else {
                     this.renderSidebar();
                     this.switchPage(this.currentPageId || this.pages[0].id);
@@ -284,6 +283,7 @@
                 const escaped = [];
                 const toc = [];
 
+                // @@...@@ 構文の保護
                 html = html.replace(/@@(.*?)@@/g, (m, p1) => {
                     escaped.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
                     return `__ESC_${escaped.length - 1}__`;
@@ -375,7 +375,12 @@
 
             async exportToPNG() {
                 this.showToast("画像を生成中...");
-                const canvas = await html2canvas(document.getElementById('view-area'), { backgroundColor: getComputedStyle(document.getElementById('content-wrapper')).backgroundColor, scale: 2, useCORS: true });
+                const canvas = await html2canvas(document.getElementById('view-area'), { 
+                    backgroundColor: getComputedStyle(document.getElementById('content-wrapper')).backgroundColor, 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false
+                });
                 const a = document.createElement('a'); a.href = canvas.toDataURL("image/png"); a.download = `${document.getElementById('current-page-title').value || 'page'}.png`; a.click();
                 this.showToast("PNGを保存しました");
             },
@@ -388,7 +393,7 @@
                 const currentStyles = document.getElementById('app-styles').innerHTML;
                 const currentTheme = document.body.className;
 
-                const template = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${this.workspaceTitle} - Viewer</title><link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet"><style>${currentStyles}.sidebar-footer, #workspace-title-input, .share-checkbox { display: none !important; }.sidebar-header-viewer { padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color); }</style></head><body class="${currentTheme}"><div id="sidebar-overlay" onclick="closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:80; backdrop-filter: blur(2px);"></div><nav id="sidebar"><div class="sidebar-header-viewer">${this.workspaceTitle}</div><ul class="page-list" id="export-page-list"></ul></nav><div id="main-container"><header id="topbar"><button class="icon-btn" onclick="openSidebar()">☰</button><div id="current-page-title" style="flex:1; font-weight:600;"></div><button class="icon-btn" onclick="toggleTheme()">🌗</button></header><div id="content-wrapper"><div id="view-area"></div></div></div><script>const pages = ${JSON.stringify(exportData)}; function renderSidebar() { const list = document.getElementById('export-page-list'); pages.forEach((p, index) => { const li = document.createElement('li'); li.className = 'page-item'; li.innerHTML = '<span class="page-title-text">' + (p.title || '無題') + '</span>'; li.onclick = () => loadPage(index, li); list.appendChild(li); }); if(pages.length > 0) loadPage(0, list.firstChild); } function loadPage(index, el) { document.querySelectorAll('.page-item').forEach(item => item.classList.remove('active')); if(el) el.classList.add('active'); const page = pages[index]; document.getElementById('current-page-title').textContent = page.title; document.getElementById('view-area').innerHTML = page.html; document.getElementById('content-wrapper').scrollTop = 0; closeSidebar(); } function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').style.display = 'block'; } function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').style.display = 'none'; } function toggleTheme() { const b = document.body; b.className = b.className === 'dark-theme' ? 'light-theme' : 'dark-theme'; } renderSidebar(); window.checkQuiz = function(btn, isCorrect) { const container = btn.closest('.quiz-container'); const resultDiv = container.querySelector('.quiz-result'); const buttons = container.querySelectorAll('.quiz-btn'); buttons.forEach(b => { b.disabled = true; if(b.dataset.correct === 'true') b.classList.add('correct'); }); if (isCorrect) { resultDiv.innerHTML = '⭕ 正解！'; resultDiv.style.color = '#2ea043'; } else { btn.classList.add('incorrect'); resultDiv.innerHTML = '❌ 不正解...'; resultDiv.style.color = '#da3633'; } resultDiv.style.display = 'block'; }; <\/script></body></html>`;
+                const template = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${this.workspaceTitle} - Viewer</title><link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet"><style>${currentStyles}.sidebar-footer, #workspace-title-input, .share-checkbox { display: none !important; }.sidebar-header-viewer { padding: 20px; font-weight: 600; border-bottom: 1px solid var(--border-color); }</style></head><body class="${currentTheme}"><div id="sidebar-overlay" onclick="closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:80; backdrop-filter: blur(2px);"></div><nav id="sidebar"><div class="sidebar-header-viewer">${this.workspaceTitle}</div><ul class="page-list" id="export-page-list"></ul></nav><div id="main-container"><header id="topbar"><button class="icon-btn" onclick="openSidebar()">☰</button><div id="current-page-title" style="flex:1; font-weight:600;"></div><button class="icon-btn" onclick="toggleTheme()">🌗</button></header><div id="content-wrapper"><div id="view-area"></div></div></div><script>const pages = ${JSON.stringify(exportData)}; function renderSidebar() { const list = document.getElementById('export-page-list'); pages.forEach((p, index) => { const li = document.createElement('li'); li.className = 'page-item'; li.innerHTML = '<span class="page-title-text">' + (p.title || '無題') + '</span>'; li.onclick = () => loadPage(index, li); list.appendChild(li); }); if(pages.length > 0) loadPage(0, list.firstChild); } function loadPage(index, el) { document.querySelectorAll('.page-item').forEach(item => item.classList.remove('active')); if(el) el.classList.add('active'); const page = pages[index]; document.getElementById('current-page-title').textContent = page.title; document.getElementById('view-area').innerHTML = page.html; document.getElementById('content-wrapper').scrollTop = 0; closeSidebar(); } function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').style.display = 'block'; } function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').style.display = 'none'; } function toggleTheme() { const b = document.body; b.className = b.className === 'dark-theme' ? 'light-theme' : 'dark-theme'; } renderSidebar(); window.checkQuiz = ${window.checkQuiz.toString()}; <\/script></body></html>`;
 
                 const blob = new Blob([template], {type: 'text/html'});
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Viewer_${this.workspaceTitle}.html`; a.click();
