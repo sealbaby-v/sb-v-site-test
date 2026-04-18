@@ -57,7 +57,6 @@
             font-size: clamp(15px, 0.8vw + 12px, 18px);
         }
 
-        /* 編集状態の視覚強調 */
         body.is-editing #topbar { border-bottom: 3px solid var(--edit-accent); }
 
         #content-wrapper {
@@ -102,10 +101,6 @@
         #view-area, #edit-area { width: 100%; max-width: 850px; line-height: 1.8; background: transparent; }
         #view-area img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; display: block; }
         
-        /* カスタムSPAN用スタイル例 */
-        .badge { background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
-        .warning { color: #da3633; font-weight: bold; }
-
         .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 0.9em; }
         .toc-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .toc-list { list-style: none; padding-left: 5px; }
@@ -227,7 +222,7 @@
 
             handleRouting() {
                 if (this.pages.length === 0) {
-                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n\n+ Spanタグの使用\n\`[span:badge|NEW]\` のように書くと [span:badge|NEW] と表示されます。\n\n+ エスケープ\n@@[[quiz:A|B]]@@ のように@@で囲むと構文が無効化されます。\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
+                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n\n+ カスタムStyle\n[[div style="border: 1px solid #0078d4; padding: 15px; border-radius: 10px;"]] \nここにブロック要素。 [[span style="color: red; font-weight: bold;"]]赤い太字[[span]] などが使えます。\n[[div]]\n\n+ エスケープ\n@@[[div style="..."]]@@ のように@@で囲むと構文が無効化されます。\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
                     this.addPage("Welcome", welcomeText);
                 } else {
                     this.renderSidebar();
@@ -278,10 +273,14 @@
                     return `__ESC_${escaped.length - 1}__`;
                 });
 
-                // 2. Spanタグ [span:className|content]
-                html = html.replace(/\[span:(.*?)\|(.*?)\]/g, '<span class="$1">$2</span>');
+                // 2. div style 構文: [[div style="..."] 内容 [[div]]
+                // 閉じタグは [[div]] または ] に対応
+                html = html.replace(/\[\[div style="(.*?)"\]\s*([\s\S]*?)\s*(\[\[div\]\]|\])/gi, '<div style="$1">$2</div>');
 
-                // 3. クイズ
+                // 3. span style 構文: [[span style="..."] 内容 [[span]]
+                html = html.replace(/\[\[span style="(.*?)"\]\s*([\s\S]*?)\s*(\[\[span\]\]|\])/gi, '<span style="$1">$2</span>');
+
+                // 4. クイズ
                 html = html.replace(/\[\[quiz:(.*?)\]\]/g, (match, p1) => {
                     let options = p1.split('|');
                     if (options.length < 2) return match;
@@ -392,6 +391,7 @@
                 this.saveData();
                 this.switchPage(id);
                 this.renderSidebar();
+                this.closeSidebar();
             },
 
             updateTitle(v) { 
