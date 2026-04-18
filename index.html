@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
+    <style id="app-styles">
         :root {
             --accent-color: #0078d4;
             --edit-accent: #d43f00;
@@ -59,8 +59,9 @@
 
         body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); }
 
+        /* 見切れ対策: padding-bottomを120pxに拡大 */
         #content-wrapper {
-            flex-grow: 1; padding: 40px 20px; overflow-y: auto; display: flex; justify-content: center;
+            flex-grow: 1; padding: 40px 20px 120px 20px; overflow-y: auto; display: flex; justify-content: center;
             background-color: var(--content-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); background-size: 20px 20px;
         }
@@ -91,7 +92,7 @@
         .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
 
         #topbar { height: 60px; background-color: var(--topbar-bg); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 20px; gap: 10px; z-index: 50; transition: background-color 0.3s; }
-        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 500; transition: 0.2s; }
+        .icon-btn { background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; font-size: 0.9em; font-weight: 500; transition: 0.2s; white-space: nowrap; }
         .icon-btn:hover { background: var(--btn-hover); border-color: var(--accent-color); }
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         .icon-btn.editing { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
@@ -125,7 +126,7 @@
 
         #edit-area { display: none; height: 100%; border: none; outline: none; font-family: 'Consolas', 'Monaco', monospace; font-size: 1.05em; resize: none; background: transparent; color: inherit; }
 
-        .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30px; background: #24292f; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.9em; }
+        .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30px; background: #24292f; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.9em; pointer-events: none; }
 
         @media (max-width: 768px) {
             #sidebar { position: absolute; height: 100%; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
@@ -158,6 +159,7 @@
             <button class="icon-btn" onclick="app.toggleEditMode()" id="edit-btn">✏️ 編集</button>
             <button class="icon-btn" onclick="window.print()">🖨️ PDF</button>
             <button class="icon-btn" onclick="app.exportToPNG()">🖼️ PNG</button>
+            <button class="icon-btn" onclick="app.toggleTheme()">🌗</button>
         </header>
         
         <div id="content-wrapper">
@@ -169,7 +171,6 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // グローバルなクイズ判定関数（エクスポート先でも共通のロジックを使うため）
         window.checkQuiz = function(btn, isCorrect) {
             const container = btn.closest('.quiz-container');
             const resultDiv = container.querySelector('.quiz-result');
@@ -206,20 +207,24 @@
             },
 
             loadLocalData() {
-                const data = localStorage.getItem('personal_workspace_data_v7');
+                const data = localStorage.getItem('personal_workspace_data_v8');
                 this.pages = data ? JSON.parse(data) : [];
-                this.workspaceTitle = localStorage.getItem('personal_workspace_title_v7') || "Workspace";
+                this.workspaceTitle = localStorage.getItem('personal_workspace_title_v8') || "Workspace";
                 document.getElementById('workspace-title-input').value = this.workspaceTitle;
+                
+                if(localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.replace('light-theme', 'dark-theme');
+                }
             },
 
             saveData() {
-                localStorage.setItem('personal_workspace_data_v7', JSON.stringify(this.pages));
-                localStorage.setItem('personal_workspace_title_v7', this.workspaceTitle);
+                localStorage.setItem('personal_workspace_data_v8', JSON.stringify(this.pages));
+                localStorage.setItem('personal_workspace_title_v8', this.workspaceTitle);
             },
 
             handleRouting() {
                 if (this.pages.length === 0) {
-                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 画像の添付\n上の「🖼️ 画像添付」ボタンから画像をアップロードすると、カーソル位置に画像が挿入されます。\n\n+ クイズの作成\n\`[[quiz:正解の選択肢|不正解の選択肢1|不正解の選択肢2]]\` のように記述すると、クイズが生成されます。（一番最初に書いたものが正解として扱われ、表示時にシャッフルされます）\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
+                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 画像の添付\n上の「🖼️ 画像添付」ボタンから画像をアップロードすると、カーソル位置に画像が挿入されます。\n\n+ クイズの作成\n\`[[quiz:正解の選択肢|不正解の選択肢1|不正解の選択肢2]]\` のように記述すると、クイズが生成されます。（一番最初に書いたものが正解として扱われ、表示時は書いた順番通りに並びます）\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
                     this.addPage("Welcome", welcomeText);
                 } else {
                     this.renderSidebar();
@@ -264,20 +269,17 @@
                 const escaped = [];
                 const toc = [];
 
-                // 1. @@ エスケープ
                 html = html.replace(/@@(.*?)@@/g, (m, p1) => {
                     escaped.push(p1.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
                     return `__ESC_${escaped.length - 1}__`;
                 });
 
-                // 2. クイズのパース [[quiz:正解|不正解1|不正解2]]
+                // クイズのパース (シャッフル処理を削除)
                 html = html.replace(/\[\[quiz:(.*?)\]\]/g, (match, p1) => {
                     let options = p1.split('|');
                     if (options.length < 2) return match;
-                    // 先頭を正解とする配列を作成
+                    
                     let optsArray = options.map((opt, index) => ({ text: opt.trim(), isCorrect: index === 0 }));
-                    // シャッフル
-                    optsArray.sort(() => Math.random() - 0.5);
                     
                     let buttonsHtml = optsArray.map(opt => 
                         `<button class="quiz-btn" data-correct="${opt.isCorrect}" onclick="checkQuiz(this, ${opt.isCorrect})">${opt.text}</button>`
@@ -286,10 +288,8 @@
                     return `<div class="quiz-container"><div class="quiz-options">${buttonsHtml}</div><div class="quiz-result"></div></div>`;
                 });
 
-                // 3. 画像のパース ![alt](base64)
                 html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">');
 
-                // 4. 見出しの事前スキャン（TOC用）
                 const tempHtml = html.replace(/^(\+{1,3})\s+(.*?)$/gm, (m, l, t) => {
                     const level = l.length;
                     const id = 'heading-' + Math.random().toString(36).substr(2, 9);
@@ -297,7 +297,6 @@
                     return `<h${level} id="${id}">${t}</h${level}>`;
                 });
 
-                // 5. [[toc]] の置換
                 let tocHTML = '';
                 if (toc.length > 0) {
                     tocHTML = `<div class="toc-box"><div class="toc-title">📍 目次</div><ul class="toc-list">`;
@@ -308,13 +307,11 @@
                 }
                 html = tempHtml.replace(/\[\[toc\]\]/gi, tocHTML);
 
-                // 6. その他の構文
                 html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\/\/(.*?)\/\//g, '<em>$1</em>');
                 html = html.replace(/^>\s+(.*?)$/gm, '<blockquote>$1</blockquote>');
                 html = html.replace(/\n/g, '<br>');
 
-                // 7. エスケープ戻し
                 escaped.forEach((v, i) => {
                     html = html.replace(`__ESC_${i}__`, `<code>${v}</code>`);
                 });
@@ -322,7 +319,6 @@
                 return html;
             },
 
-            // 画像アップロード処理
             handleImageUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
@@ -333,11 +329,9 @@
                     const start = editArea.selectionStart;
                     const end = editArea.selectionEnd;
                     const text = editArea.value;
-                    // 画像のマークダウン構文を挿入
                     const insertText = `\n![画像](${base64})\n`;
                     editArea.value = text.substring(0, start) + insertText + text.substring(end);
                     
-                    // 保存とプレビュー更新
                     const p = this.pages.find(x => x.id === this.currentPageId);
                     if(p) p.content = editArea.value;
                     this.saveData();
@@ -345,7 +339,7 @@
                     this.showToast("画像を挿入しました");
                 };
                 reader.readAsDataURL(file);
-                event.target.value = ''; // 同じ画像を再度選べるようにリセット
+                event.target.value = ''; 
             },
 
             toggleEditMode() {
@@ -370,6 +364,17 @@
                     edit.style.display = 'none';
                     btn.textContent = "✏️ 編集";
                     btn.classList.remove('editing');
+                }
+            },
+
+            toggleTheme() {
+                const isDark = document.body.classList.contains('dark-theme');
+                if(isDark) {
+                    document.body.classList.replace('dark-theme', 'light-theme');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.replace('light-theme', 'dark-theme');
+                    localStorage.setItem('theme', 'dark');
                 }
             },
 
@@ -403,109 +408,95 @@
                 this.showToast("PNGを保存しました");
             },
 
-            // 閲覧モードとしてHTMLをエクスポートする
+            // 閲覧モードとしてHTMLをエクスポートする（デザイン完全同期）
             exportSelectedHTML() {
                 const selectedIds = Array.from(document.querySelectorAll('.share-checkbox:checked')).map(cb => cb.dataset.id);
                 if (selectedIds.length === 0) return this.showToast("ページを選択してください");
                 
-                // 選択されたページをパース済みの状態で配列化
                 const exportData = this.pages.filter(p => selectedIds.includes(p.id)).map(p => ({
                     title: p.title,
                     html: this.parseFTML(p.content)
                 }));
 
                 const pagesJson = JSON.stringify(exportData);
+                // アプリケーションと全く同じCSSを抽出
+                const currentStyles = document.getElementById('app-styles').innerHTML;
+                const currentTheme = document.body.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme';
 
-                // エクスポート用ビューアのテンプレート
                 const template = `<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>${this.workspaceTitle} - Viewer</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --accent-color: #0078d4; --bg-color: #f6f8fa; --text-color: #1a1f23; --sidebar-bg: #ffffff; --border-color: #e1e4e8; --toc-bg: #f8f9fa; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'M PLUS 1', sans-serif; display: flex; height: 100vh; background: var(--bg-color); color: var(--text-color); font-size: 16px; }
-        
-        #sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 20px; font-weight: 600; font-size: 1.2em; border-bottom: 1px solid var(--border-color); background: var(--sidebar-bg); }
-        .page-list { padding: 10px 0; }
-        .page-item { padding: 12px 20px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .page-item:hover { background: #f1f3f5; }
-        .page-item.active { border-left-color: var(--accent-color); font-weight: 600; background: #f1f3f5; color: var(--accent-color); }
-        
-        #content { flex-grow: 1; padding: 40px 20px; overflow-y: auto; background-image: radial-gradient(#d0d7de 1px, transparent 1px); background-size: 20px 20px; display: flex; justify-content: center; align-items: flex-start; }
-        .viewer-container { width: 100%; max-width: 850px; background: #ffffff; padding: 50px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 1px solid var(--border-color); line-height: 1.8; min-height: calc(100vh - 80px); }
-        
-        img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; display: block; }
-        h1 { font-size: 2.2em; margin: 0 0 0.8em; padding-bottom: 0.3em; border-bottom: 3px solid var(--accent-color); }
-        h2 { font-size: 1.6em; margin: 1.2em 0 0.6em; padding-bottom: 0.2em; border-bottom: 1px solid var(--border-color); }
-        h3 { font-size: 1.3em; margin: 1em 0 0.5em; }
-        blockquote { border-left: 4px solid #d0d7de; background: #f9fafb; padding: 15px 20px; margin: 20px 0; font-style: italic; }
-        code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        
-        .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; }
-        .toc-title { font-weight: 600; margin-bottom: 8px; }
-        .toc-list { list-style: none; padding-left: 5px; } .toc-item-2 { padding-left: 15px; } .toc-item-3 { padding-left: 30px; }
-        .toc-link { color: inherit; text-decoration: none; } .toc-link:hover { color: var(--accent-color); }
-        
-        /* Quiz CSS */
-        .quiz-container { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin: 25px 0; }
-        .quiz-options { display: flex; flex-wrap: wrap; gap: 10px; }
-        .quiz-btn { flex: 1; min-width: 140px; padding: 12px; border: 1px solid var(--border-color); background: #fff; color: var(--text-color); border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1em; font-weight: 500; font-family: inherit; }
-        .quiz-btn:hover:not(:disabled) { border-color: var(--accent-color); background: #f1f3f5; }
-        .quiz-btn.correct { background: #2ea043 !important; color: white !important; border-color: #2ea043 !important; }
-        .quiz-btn.incorrect { background: #da3633 !important; color: white !important; border-color: #da3633 !important; }
-        .quiz-btn:disabled { cursor: not-allowed; opacity: 0.8; }
-        .quiz-result { margin-top: 15px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
-
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #sidebar { width: 100%; height: auto; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border-color); }
-            #content { padding: 20px; }
-            .viewer-container { padding: 30px 20px; min-height: auto; }
-        }
+        ${currentStyles}
+        /* ビューアで不要なUI要素を隠す */
+        .sidebar-footer, #workspace-title-input { display: none !important; }
+        .sidebar-header-viewer { padding: 20px; font-weight: 600; font-size: 1.2em; border-bottom: 1px solid var(--border-color); color: var(--text-color); }
     </style>
 </head>
-<body>
-    <div id="sidebar">
-        <div class="sidebar-header">${this.workspaceTitle}</div>
-        <div class="page-list" id="export-page-list"></div>
-    </div>
-    <div id="content">
-        <div class="viewer-container" id="viewer"></div>
+<body class="${currentTheme}">
+    <div id="sidebar-overlay" onclick="closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:80; backdrop-filter: blur(2px);"></div>
+
+    <nav id="sidebar" class="collapsed">
+        <div class="sidebar-header-viewer">${this.workspaceTitle}</div>
+        <ul class="page-list" id="export-page-list"></ul>
+    </nav>
+
+    <div id="main-container">
+        <header id="topbar">
+            <button class="icon-btn" onclick="openSidebar()">☰</button>
+            <div id="current-page-title" style="flex:1; font-size:1.15em; font-weight:600; color:inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+            <button class="icon-btn" onclick="toggleTheme()">🌗 テーマ切替</button>
+        </header>
+        
+        <div id="content-wrapper">
+            <div id="view-area"></div>
+        </div>
     </div>
 
     <script>
         const pages = ${pagesJson};
         
         function renderSidebar() {
-            const sidebarList = document.getElementById('export-page-list');
+            const list = document.getElementById('export-page-list');
             pages.forEach((p, index) => {
-                const div = document.createElement('div');
-                div.className = 'page-item';
-                div.textContent = p.title || '無題';
-                div.onclick = () => loadPage(index, div);
-                sidebarList.appendChild(div);
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = '<span class="page-title-text">' + (p.title || '無題') + '</span>';
+                li.onclick = () => loadPage(index, li);
+                list.appendChild(li);
             });
-            if(pages.length > 0) loadPage(0, sidebarList.firstChild);
+            if(pages.length > 0) loadPage(0, list.firstChild);
         }
 
         function loadPage(index, el) {
             document.querySelectorAll('.page-item').forEach(item => item.classList.remove('active'));
             if(el) el.classList.add('active');
             
-            const viewer = document.getElementById('viewer');
             const page = pages[index];
-            viewer.innerHTML = '<h1>' + (page.title || '無題') + '</h1>' + page.html;
+            document.getElementById('current-page-title').textContent = page.title || '無題';
+            document.getElementById('view-area').innerHTML = page.html;
             
-            // モバイル時、ページ遷移したら一番上へスクロール
-            document.getElementById('content').scrollTop = 0;
+            document.getElementById('content-wrapper').scrollTop = 0;
+            if(window.innerWidth <= 768) closeSidebar();
         }
 
-        function checkQuiz(btn, isCorrect) {
+        function openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; }
+        function closeSidebar() { document.getElementById('sidebar').classList.add('collapsed'); document.getElementById('sidebar-overlay').style.display = 'none'; }
+        
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-theme');
+            if(isDark) {
+                document.body.classList.replace('dark-theme', 'light-theme');
+            } else {
+                document.body.classList.replace('light-theme', 'dark-theme');
+            }
+        }
+
+        window.checkQuiz = function(btn, isCorrect) {
             const container = btn.closest('.quiz-container');
             const resultDiv = container.querySelector('.quiz-result');
             const buttons = container.querySelectorAll('.quiz-btn');
@@ -526,9 +517,12 @@
                 resultDiv.style.color = '#da3633';
             }
             resultDiv.style.display = 'block';
-        }
+        };
 
         renderSidebar();
+        if(window.innerWidth > 768) {
+            document.getElementById('sidebar').classList.remove('collapsed');
+        }
     <\/script>
 </body>
 </html>`;
@@ -538,6 +532,7 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `Viewer_${this.workspaceTitle}.html`;
                 a.click();
+                this.showToast("閲覧モード用HTMLを保存しました");
             },
 
             openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; },
