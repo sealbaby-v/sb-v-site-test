@@ -28,7 +28,8 @@
             --quote-bg: #f9fafb;
             --quote-border: #d0d7de;
             --toc-bg: #f8f9fa;
-            --edit-bg: #fcfcfc;
+            --content-bg: #fcfcfc; /* コンテンツエリアの背景色 */
+            --dot-color: #e1e4e8; /* ドットの色 */
         }
 
         body.dark-theme {
@@ -43,7 +44,8 @@
             --quote-bg: #161b22;
             --quote-border: #444c56;
             --toc-bg: #161b22;
-            --edit-bg: #090c10;
+            --content-bg: #090c10; /* ダークモード時のコンテンツエリアの背景色 */
+            --dot-color: #30363d; /* ダークモード時のドットの色 */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,8 +57,20 @@
             font-size: clamp(15px, 0.8vw + 12px, 18px);
         }
 
-        body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); background-color: var(--edit-bg); }
-        body.is-editing #edit-area { background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 20px 20px; }
+        /* トップバーの編集状態スタイル（下線のみ残す） */
+        body.is-editing #topbar { border-bottom: 2px solid var(--edit-accent); }
+
+        /* コンテンツエリア全体にドット背景を適用 */
+        #content-wrapper {
+            flex-grow: 1;
+            padding: 40px 20px;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            background-color: var(--content-bg); /* 背景色を適用 */
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px); /* ドットパターンを適用 */
+            background-size: 20px 20px;
+        }
 
         #sidebar {
             width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
@@ -90,8 +104,13 @@
         .icon-btn.primary { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         .icon-btn.editing { background-color: var(--edit-accent); color: #fff; border-color: var(--edit-accent); }
         
-        #content-wrapper { flex-grow: 1; padding: 40px 20px; overflow-y: auto; display: flex; justify-content: center; }
-        #view-area, #edit-area { width: 100%; max-width: 850px; line-height: 1.8; }
+        #view-area, #edit-area {
+            width: 100%;
+            max-width: 850px;
+            line-height: 1.8;
+            /* 背景は#content-wrapperで管理するため、ここでは指定しない */
+            background: transparent;
+        }
         
         .toc-box { background: var(--toc-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 0.9em; }
         .toc-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
@@ -315,7 +334,7 @@
                 this.showToast("画像を生成中...");
                 const element = document.getElementById('view-area');
                 const canvas = await html2canvas(element, {
-                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-color'),
+                    backgroundColor: getComputedStyle(document.getElementById('content-wrapper')).getPropertyValue('background-color'),
                     scale: 2,
                     useCORS: true
                 });
