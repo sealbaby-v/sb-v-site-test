@@ -66,11 +66,13 @@
         }
 
         #sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; transition: transform var(--transition-speed), width var(--transition-speed);
+            display: flex; flex-direction: column; transition: transform var(--transition-speed);
             flex-shrink: 0; z-index: 100; height: 100%;
+            transform: translateX(-280px);
         }
-        #sidebar.collapsed { width: 0; transform: translateX(-280px); }
+        #sidebar.open { transform: translateX(0); }
         
         #main-container { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
@@ -125,7 +127,6 @@
         .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30px; background: #24292f; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.9em; pointer-events: none; }
 
         @media (max-width: 768px) {
-            #sidebar { position: absolute; height: 100%; box-shadow: 4px 0 20px rgba(0,0,0,0.1); }
             .btn-text { display: none; }
         }
     </style>
@@ -136,7 +137,7 @@
 
     <input type="file" id="image-upload" accept="image/*" style="display:none;" onchange="app.handleImageUpload(event)">
 
-    <nav id="sidebar" class="collapsed">
+    <nav id="sidebar">
         <div class="sidebar-header">
             <input type="text" id="workspace-title-input" placeholder="Workspace Name" onchange="app.updateWorkspaceTitle(this.value)">
         </div>
@@ -220,7 +221,7 @@
 
             handleRouting() {
                 if (this.pages.length === 0) {
-                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 画像の添付\n上の「🖼️ 画像添付」ボタンから画像をアップロードすると、カーソル位置に画像が挿入されます。\n\n+ クイズの作成\n\`[[quiz:正解の選択肢|不正解の選択肢1|不正解の選択肢2]]\` のように記述すると、クイズが生成されます。（一番最初に書いたものが正解として扱われ、表示時は書いた順番通りに並びます）\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
+                    const welcomeText = `[[toc]]\n+ 使い方\n**太字** や //斜体// が使えます。\n> 引用も可能です。\n\n+ 画像の添付\n上の「🖼️ 画像添付」ボタンから画像をアップロードすると、カーソル位置に画像が挿入されます。\n\n+ クイズの作成\n\`[[quiz:正解の選択肢|不正解の選択肢1|不正解の選択肢2]]\` のように記述すると、クイズが生成されます。\n\n> Q. 次のうち、日本の首都はどれ？\n[[quiz:東京|大阪|京都|北海道]]`;
                     this.addPage("Welcome", welcomeText);
                 } else {
                     this.renderSidebar();
@@ -251,7 +252,7 @@
                 document.getElementById('edit-area').value = page.content;
                 this.renderContent(page.content);
                 this.renderSidebar();
-                if(window.innerWidth <= 768) this.closeSidebar();
+                this.closeSidebar();
             },
 
             renderContent(text) {
@@ -418,19 +419,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>\${this.workspaceTitle} - Viewer</title>
+    <title>${this.workspaceTitle} - Viewer</title>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        \${currentStyles}
-        .sidebar-footer, #workspace-title-input { display: none !important; }
+        ${currentStyles}
+        .sidebar-footer, #workspace-title-input, .share-checkbox { display: none !important; }
         .sidebar-header-viewer { padding: 20px; font-weight: 600; font-size: 1.2em; border-bottom: 1px solid var(--border-color); color: var(--text-color); }
     </style>
 </head>
-<body class="\${currentTheme}">
+<body class="${currentTheme}">
     <div id="sidebar-overlay" onclick="closeSidebar()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); z-index:80; backdrop-filter: blur(2px);"></div>
 
-    <nav id="sidebar" class="collapsed">
-        <div class="sidebar-header-viewer">\${this.workspaceTitle}</div>
+    <nav id="sidebar">
+        <div class="sidebar-header-viewer">${this.workspaceTitle}</div>
         <ul class="page-list" id="export-page-list"></ul>
     </nav>
 
@@ -447,7 +448,7 @@
     </div>
 
     <script>
-        const pages = \${pagesJson};
+        const pages = ${pagesJson};
         
         function renderSidebar() {
             const list = document.getElementById('export-page-list');
@@ -470,11 +471,17 @@
             document.getElementById('view-area').innerHTML = page.html;
             
             document.getElementById('content-wrapper').scrollTop = 0;
-            if(window.innerWidth <= 768) closeSidebar();
+            closeSidebar();
         }
 
-        function openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; }
-        function closeSidebar() { document.getElementById('sidebar').classList.add('collapsed'); document.getElementById('sidebar-overlay').style.display = 'none'; }
+        function openSidebar() { 
+            document.getElementById('sidebar').classList.add('open'); 
+            document.getElementById('sidebar-overlay').style.display = 'block'; 
+        }
+        function closeSidebar() { 
+            document.getElementById('sidebar').classList.remove('open'); 
+            document.getElementById('sidebar-overlay').style.display = 'none'; 
+        }
         
         function toggleTheme() {
             const isDark = document.body.classList.contains('dark-theme');
@@ -509,7 +516,6 @@
         };
 
         renderSidebar();
-        // ページ読み込み時に自動で開く設定を削除しました
     <\/script>
 </body>
 </html>`;
@@ -522,8 +528,14 @@
                 this.showToast("閲覧モード用HTMLを保存しました");
             },
 
-            openSidebar() { document.getElementById('sidebar').classList.remove('collapsed'); document.getElementById('sidebar-overlay').style.display = 'block'; },
-            closeSidebar() { document.getElementById('sidebar').classList.add('collapsed'); document.getElementById('sidebar-overlay').style.display = 'none'; },
+            openSidebar() { 
+                document.getElementById('sidebar').classList.add('open'); 
+                document.getElementById('sidebar-overlay').style.display = 'block'; 
+            },
+            closeSidebar() { 
+                document.getElementById('sidebar').classList.remove('open'); 
+                document.getElementById('sidebar-overlay').style.display = 'none'; 
+            },
             showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2500); }
         };
 
